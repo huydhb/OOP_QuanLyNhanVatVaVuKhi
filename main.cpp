@@ -666,7 +666,7 @@ void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
         return;
     }
 
-    TieuDe("DANH SACH VU KHI", MAU_XANH_LA);
+    TieuDe("DANH SACH CAC LOAI VU KHI TRONG KHO", MAU_XANH_LA);
 
     for (size_t i = 0; i < ds.size(); ++i) {
         setColor(MAU_TRANG_SANG);
@@ -691,7 +691,6 @@ void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
         resetColor();
     }
 }
-
 
 void TaoDuLieuMau(vector<NhanVat>& ds) {
     ds.clear();
@@ -755,13 +754,42 @@ void ThemNhanVat(vector<NhanVat>& ds) {
     InThongBao("Da them nhan vat thanh cong.");
 }
 
-void ThemVuKhi(vector<VuKhi*>& ds) {
+VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
     TieuDe("THEM VU KHI", MAU_VANG);
-    ds.push_back(TaoVuKhiTheoLuaChon());
+    VuKhi* vk = TaoVuKhiTheoLuaChon();
+    ds.push_back(vk);
     InThongBao("Da them vu khi thanh cong.");
+    return vk;
 }
 
-void TrangBiChoNhanVat(vector<NhanVat>& ds) {
+VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
+    if (ds.empty()) {
+        InCanhBao("Danh sach vu khi rong.");
+        return nullptr;
+    }
+
+    HienThiDanhSachVK(ds);
+
+    int idx;
+    setColor(MAU_VANG);
+    cout << "Chon vu khi cho nhan vat (1-" << ds.size() << "): ";
+    resetColor();
+    cin >> idx;
+
+    if (Kiem* k = dynamic_cast<Kiem*>(ds[idx])) {
+        return k;
+    }
+    else if (Sung* s = dynamic_cast<Sung*>(ds[idx])) {
+        return s;
+    }
+    else if (PhepThuat* p = dynamic_cast<PhepThuat*>(ds[idx])) {
+        return p;
+    }
+
+    return nullptr;
+}
+
+void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
     if (ds.empty()) {
         InCanhBao("Chua co nhan vat nao.");
         return;
@@ -769,7 +797,8 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds) {
 
     HienThiDanhSach(ds);
 
-    int idx;
+    int idx, opt;
+    VuKhi* moi;
     setColor(MAU_VANG);
     cout << "Chon chi so nhan vat can trang bi (1-" << ds.size() << "): ";
     resetColor();
@@ -780,9 +809,24 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds) {
         return;
     }
 
-    VuKhi* moi = TaoVuKhiTheoLuaChon();
-    ds[idx - 1].TrangBi(moi);
+    cout << "1. Trang bi vu khi co san\n"
+         << "2. Trang bi vu khi moi\n";
+    
+    cin >> opt;
 
+    switch (opt) {
+        case 1:
+            moi = ChonVuKhiTuDanhSach(dsVK);
+            break;
+        case 2:
+            moi = ThemVuKhi(dsVK);
+            break;
+        default:
+            InLoi("Chi so khong hop le.");
+            return;
+    }
+        
+    ds[idx - 1].TrangBi(moi);
     InThongBao("Da trang bi vu khi moi cho nhan vat.");
 }
 
@@ -856,7 +900,7 @@ void InMenu() {
          << setw(6) << "2." << "Them nhan vat moi (co chon vu khi)\n"
          << setw(6) << "3." << "Them vu khi moi\n"
          << setw(6) << "4." << "Hien thi danh sach nhan vat\n"
-         << setw(6) << "5." << "Hien thi danh sach vu khi\n"
+         << setw(6) << "5." << "Hien thi danh sach cac loai vu khi trong kho\n"
          << setw(6) << "6." << "Trang bi / thay vu khi cho nhan vat\n"
          << setw(6) << "7." << "Nhan vat tan cong muc tieu\n"
          << setw(6) << "8." << "Sao chep nhan vat (copy constructor)\n"
@@ -904,7 +948,7 @@ int main() {
                 HienThiDanhSachVK(danhSachVK);
                 break;
             case 6:
-                TrangBiChoNhanVat(danhSach);
+                TrangBiChoNhanVat(danhSach, danhSachVK);
                 break;
             case 7:
                 TanCong(danhSach);
