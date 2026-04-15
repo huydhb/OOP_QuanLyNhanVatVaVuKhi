@@ -660,6 +660,39 @@ void HienThiDanhSach(const vector<NhanVat>& ds) {
     }
 }
 
+void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
+    if (ds.empty()) {
+        InCanhBao("Danh sach vu khi dang rong.");
+        return;
+    }
+
+    TieuDe("DANH SACH VU KHI", MAU_XANH_LA);
+
+    for (size_t i = 0; i < ds.size(); ++i) {
+        setColor(MAU_TRANG_SANG);
+        cout << "[Vu Khi " << i + 1 << "]\n";
+        resetColor();
+
+        if (ds[i] == nullptr) {
+            cout << "Vu khi khong ton tai.\n";
+        }
+        else if (const Kiem* k = dynamic_cast<const Kiem*>(ds[i])) {
+            cout << *k << '\n';
+        }
+        else if (const Sung* s = dynamic_cast<const Sung*>(ds[i])) {
+            cout << *s << '\n';
+        }
+        else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(ds[i])) {
+            cout << *p << '\n';
+        }
+
+        setColor(MAU_XANH_DUONG);
+        cout << "------------------------------------------------------------\n";
+        resetColor();
+    }
+}
+
+
 void TaoDuLieuMau(vector<NhanVat>& ds) {
     ds.clear();
 
@@ -720,6 +753,12 @@ void ThemNhanVat(vector<NhanVat>& ds) {
     cin >> nv;
     ds.push_back(nv);
     InThongBao("Da them nhan vat thanh cong.");
+}
+
+void ThemVuKhi(vector<VuKhi*>& ds) {
+    TieuDe("THEM VU KHI", MAU_VANG);
+    ds.push_back(TaoVuKhiTheoLuaChon());
+    InThongBao("Da them vu khi thanh cong.");
 }
 
 void TrangBiChoNhanVat(vector<NhanVat>& ds) {
@@ -815,10 +854,12 @@ void InMenu() {
     cout << left
          << setw(6) << "1." << "Tao du lieu mau\n"
          << setw(6) << "2." << "Them nhan vat moi (co chon vu khi)\n"
-         << setw(6) << "3." << "Hien thi danh sach nhan vat\n"
-         << setw(6) << "4." << "Trang bi / thay vu khi cho nhan vat\n"
-         << setw(6) << "5." << "Nhan vat tan cong muc tieu\n"
-         << setw(6) << "6." << "Sao chep nhan vat (copy constructor)\n"
+         << setw(6) << "3." << "Them vu khi moi\n"
+         << setw(6) << "4." << "Hien thi danh sach nhan vat\n"
+         << setw(6) << "5." << "Hien thi danh sach vu khi\n"
+         << setw(6) << "6." << "Trang bi / thay vu khi cho nhan vat\n"
+         << setw(6) << "7." << "Nhan vat tan cong muc tieu\n"
+         << setw(6) << "8." << "Sao chep nhan vat (copy constructor)\n"
          << setw(6) << "0." << "Thoat\n";
     resetColor();
 
@@ -833,6 +874,7 @@ int main() {
     SetConsoleCP(65001);
 
     vector<NhanVat> danhSach;
+    vector<VuKhi*> danhSachVK;
     int luaChon;
 
     do {
@@ -853,15 +895,21 @@ int main() {
                 ThemNhanVat(danhSach);
                 break;
             case 3:
-                HienThiDanhSach(danhSach);
+                ThemVuKhi(danhSachVK);
                 break;
             case 4:
-                TrangBiChoNhanVat(danhSach);
+                HienThiDanhSach(danhSach);
                 break;
             case 5:
-                TanCong(danhSach);
+                HienThiDanhSachVK(danhSachVK);
                 break;
             case 6:
+                TrangBiChoNhanVat(danhSach);
+                break;
+            case 7:
+                TanCong(danhSach);
+                break;
+            case 8:
                 SaoChepNhanVat(danhSach);
                 break;
             case 0:
