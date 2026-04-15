@@ -404,6 +404,119 @@ float PhepThuat::SatThuong(int t) {
     return soLanRaPhepTheoThoiGian * getSatThuongCoBan();
 }
 
+// ========================= CAC HAM KHOI TAO VA HIEN THI VA TRANG BI VU KHI =========================
+void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
+    if (ds.empty()) {
+        InCanhBao("Danh sach vu khi dang rong.");
+        return;
+    }
+
+    TieuDe("DANH SACH CAC LOAI VU KHI TRONG KHO", MAU_XANH_LA);
+
+    for (size_t i = 0; i < ds.size(); ++i) {
+        setColor(MAU_TRANG_SANG);
+        cout << "[Vu Khi " << i + 1 << "]\n";
+        resetColor();
+
+        if (ds[i] == nullptr) {
+            cout << "Vu khi khong ton tai.\n";
+        }
+        else if (const Kiem* k = dynamic_cast<const Kiem*>(ds[i])) {
+            cout << *k << '\n';
+        }
+        else if (const Sung* s = dynamic_cast<const Sung*>(ds[i])) {
+            cout << *s << '\n';
+        }
+        else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(ds[i])) {
+            cout << *p << '\n';
+        }
+
+        setColor(MAU_XANH_DUONG);
+        cout << "------------------------------------------------------------\n";
+        resetColor();
+    }
+}
+
+VuKhi* TaoVuKhiTheoLuaChon() {
+    int chon;
+
+    setColor(MAU_XANH_DUONG);
+    cout << "Chon loai vu khi:\n";
+    cout << "1. Kiem\n";
+    cout << "2. Sung\n";
+    cout << "3. PhepThuat\n";
+    resetColor();
+
+    setColor(MAU_VANG);
+    cout << "Nhap lua chon: ";
+    resetColor();
+    cin >> chon;
+
+    VuKhi* moi = nullptr;
+
+    switch (chon) {
+        case 1: {
+            Kiem* k = new Kiem();
+            cin >> *k;
+            moi = k;
+            break;
+        }
+        case 2: {
+            Sung* s = new Sung();
+            cin >> *s;
+            moi = s;
+            break;
+        }
+        case 3: {
+            PhepThuat* p = new PhepThuat();
+            cin >> *p;
+            moi = p;
+            break;
+        }
+        default:
+            InLoi("Lua chon khong hop le. Khong tao vu khi.");
+            break;
+    }
+
+    return moi;
+}
+
+
+VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
+    TieuDe("THEM VU KHI", MAU_VANG);
+    VuKhi* vk = TaoVuKhiTheoLuaChon();
+    ds.push_back(vk);
+    InThongBao("Da them vu khi thanh cong.");
+    return vk;
+}
+
+VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
+    if (ds.empty()) {
+        InCanhBao("Danh sach vu khi rong.");
+        return nullptr;
+    }
+
+    HienThiDanhSachVK(ds);
+
+    int idx;
+    setColor(MAU_VANG);
+    cout << "Chon vu khi cho nhan vat (1-" << ds.size() << "): ";
+    resetColor();
+    cin >> idx;
+
+    if (Kiem* k = dynamic_cast<Kiem*>(ds[idx])) {
+        return k;
+    }
+    else if (Sung* s = dynamic_cast<Sung*>(ds[idx])) {
+        return s;
+    }
+    else if (PhepThuat* p = dynamic_cast<PhepThuat*>(ds[idx])) {
+        return p;
+    }
+
+    return nullptr;
+}
+
 // ========================= LOP NHANVAT =========================
 class NhanVat {
 private:
@@ -519,28 +632,20 @@ istream& operator>>(istream& in, NhanVat& nv) {
     nv.setNangLuong(nangLuong);
 
     cout << "Chon vu khi cho nhan vat:\n";
-    cout << "1. Kiem\n2. Sung\n3. PhepThuat\n0. Khong trang bi\n";
+    cout << "1. Chon vu khi tu kho\n2. Tao vu khi moi\n0. Khong trang bi\n";
     cout << "Lua chon: ";
     in >> luaChon;
 
     VuKhi* moi = nullptr;
     switch (luaChon) {
         case 1: {
-            Kiem* k = new Kiem();
-            in >> *k;
-            moi = k;
+            extern vector<VuKhi*> danhSachVK;
+            moi = ChonVuKhiTuDanhSach(danhSachVK);
             break;
         }
         case 2: {
-            Sung* s = new Sung();
-            in >> *s;
-            moi = s;
-            break;
-        }
-        case 3: {
-            PhepThuat* p = new PhepThuat();
-            in >> *p;
-            moi = p;
+            extern vector<VuKhi*> danhSachVK;
+            moi = ThemVuKhi(danhSachVK);
             break;
         }
         default:
@@ -660,38 +765,6 @@ void HienThiDanhSach(const vector<NhanVat>& ds) {
     }
 }
 
-void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
-    if (ds.empty()) {
-        InCanhBao("Danh sach vu khi dang rong.");
-        return;
-    }
-
-    TieuDe("DANH SACH CAC LOAI VU KHI TRONG KHO", MAU_XANH_LA);
-
-    for (size_t i = 0; i < ds.size(); ++i) {
-        setColor(MAU_TRANG_SANG);
-        cout << "[Vu Khi " << i + 1 << "]\n";
-        resetColor();
-
-        if (ds[i] == nullptr) {
-            cout << "Vu khi khong ton tai.\n";
-        }
-        else if (const Kiem* k = dynamic_cast<const Kiem*>(ds[i])) {
-            cout << *k << '\n';
-        }
-        else if (const Sung* s = dynamic_cast<const Sung*>(ds[i])) {
-            cout << *s << '\n';
-        }
-        else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(ds[i])) {
-            cout << *p << '\n';
-        }
-
-        setColor(MAU_XANH_DUONG);
-        cout << "------------------------------------------------------------\n";
-        resetColor();
-    }
-}
-
 void TaoDuLieuMau(vector<NhanVat>& ds) {
     ds.clear();
 
@@ -702,91 +775,12 @@ void TaoDuLieuMau(vector<NhanVat>& ds) {
     InThongBao("Da tao 3 nhan vat mau: Arthur, Rambo, Merlin.");
 }
 
-VuKhi* TaoVuKhiTheoLuaChon() {
-    int chon;
-
-    setColor(MAU_XANH_DUONG);
-    cout << "Chon loai vu khi:\n";
-    cout << "1. Kiem\n";
-    cout << "2. Sung\n";
-    cout << "3. PhepThuat\n";
-    resetColor();
-
-    setColor(MAU_VANG);
-    cout << "Nhap lua chon: ";
-    resetColor();
-    cin >> chon;
-
-    VuKhi* moi = nullptr;
-
-    switch (chon) {
-        case 1: {
-            Kiem* k = new Kiem();
-            cin >> *k;
-            moi = k;
-            break;
-        }
-        case 2: {
-            Sung* s = new Sung();
-            cin >> *s;
-            moi = s;
-            break;
-        }
-        case 3: {
-            PhepThuat* p = new PhepThuat();
-            cin >> *p;
-            moi = p;
-            break;
-        }
-        default:
-            InLoi("Lua chon khong hop le. Khong tao vu khi.");
-            break;
-    }
-
-    return moi;
-}
-
 void ThemNhanVat(vector<NhanVat>& ds) {
     TieuDe("THEM NHAN VAT", MAU_VANG);
     NhanVat nv;
     cin >> nv;
     ds.push_back(nv);
     InThongBao("Da them nhan vat thanh cong.");
-}
-
-VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
-    TieuDe("THEM VU KHI", MAU_VANG);
-    VuKhi* vk = TaoVuKhiTheoLuaChon();
-    ds.push_back(vk);
-    InThongBao("Da them vu khi thanh cong.");
-    return vk;
-}
-
-VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
-    if (ds.empty()) {
-        InCanhBao("Danh sach vu khi rong.");
-        return nullptr;
-    }
-
-    HienThiDanhSachVK(ds);
-
-    int idx;
-    setColor(MAU_VANG);
-    cout << "Chon vu khi cho nhan vat (1-" << ds.size() << "): ";
-    resetColor();
-    cin >> idx;
-
-    if (Kiem* k = dynamic_cast<Kiem*>(ds[idx])) {
-        return k;
-    }
-    else if (Sung* s = dynamic_cast<Sung*>(ds[idx])) {
-        return s;
-    }
-    else if (PhepThuat* p = dynamic_cast<PhepThuat*>(ds[idx])) {
-        return p;
-    }
-
-    return nullptr;
 }
 
 void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
@@ -912,13 +906,13 @@ void InMenu() {
     resetColor();
 }
 
+vector<NhanVat> danhSach;
+vector<VuKhi*> danhSachVK;
+
 // ========================= MAIN =========================
 int main() {
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
-
-    vector<NhanVat> danhSach;
-    vector<VuKhi*> danhSachVK;
     int luaChon;
 
     do {
