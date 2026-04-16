@@ -571,13 +571,13 @@ VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
     resetColor();
     cin >> idx;
 
-    if (Kiem* k = dynamic_cast<Kiem*>(ds[idx])) {
+    if (Kiem* k = dynamic_cast<Kiem*>(ds[idx - 1])) {
         return k;
     }
-    else if (Sung* s = dynamic_cast<Sung*>(ds[idx])) {
+    else if (Sung* s = dynamic_cast<Sung*>(ds[idx - 1])) {
         return s;
     }
-    else if (PhepThuat* p = dynamic_cast<PhepThuat*>(ds[idx])) {
+    else if (PhepThuat* p = dynamic_cast<PhepThuat*>(ds[idx - 1])) {
         return p;
     }
 
@@ -960,11 +960,12 @@ void InMenu() {
          << setw(6) << "1." << "Tao du lieu mau\n"
          << setw(6) << "2." << "Them nhan vat moi (co chon vu khi)\n"
          << setw(6) << "3." << "Them vu khi moi\n"
-         << setw(6) << "4." << "Hien thi danh sach nhan vat\n"
-         << setw(6) << "5." << "Hien thi danh sach cac loai vu khi trong kho\n"
-         << setw(6) << "6." << "Trang bi / thay vu khi cho nhan vat\n"
-         << setw(6) << "7." << "Nhan vat tan cong muc tieu\n"
-         << setw(6) << "8." << "Sao chep nhan vat (copy constructor)\n"
+         << setw(6) << "4." << "Them vu khi moi tu file\n"
+         << setw(6) << "5." << "Hien thi danh sach nhan vat\n"
+         << setw(6) << "6." << "Hien thi danh sach cac loai vu khi trong kho\n"
+         << setw(6) << "7." << "Trang bi / thay vu khi cho nhan vat\n"
+         << setw(6) << "8." << "Nhan vat tan cong muc tieu\n"
+         << setw(6) << "9." << "Sao chep nhan vat (copy constructor)\n"
          << setw(6) << "0." << "Thoat\n";
     resetColor();
 
@@ -993,9 +994,6 @@ int main() {
         }
 
         switch (luaChon) {
-            case -1:
-                ThemVuKhiTuFile(danhSachVK);
-                break;
             case 1:
                 TaoDuLieuMau(danhSach);
                 break;
@@ -1006,18 +1004,21 @@ int main() {
                 ThemVuKhi(danhSachVK);
                 break;
             case 4:
-                HienThiDanhSach(danhSach);
+                ThemVuKhiTuFile(danhSachVK);
                 break;
             case 5:
-                HienThiDanhSachVK(danhSachVK);
+                HienThiDanhSach(danhSach);
                 break;
             case 6:
-                TrangBiChoNhanVat(danhSach, danhSachVK);
+                HienThiDanhSachVK(danhSachVK);
                 break;
             case 7:
-                TanCong(danhSach);
+                TrangBiChoNhanVat(danhSach, danhSachVK);
                 break;
             case 8:
+                TanCong(danhSach);
+                break;
+            case 9:
                 SaoChepNhanVat(danhSach);
                 break;
             case 0:
