@@ -501,55 +501,66 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
     ifstream inp (duongDanFile);
     if (inp.good()) {
         while (getline(inp, thuocTinhVuKhi)){
-            stringstream ss(thuocTinhVuKhi);
-            string loaiVuKhi, tenVuKhi, satThuongCoBanSTR, tocDoRaDonSTR;
-            float satThuongCoBan, tocDoRaDon;
+            try {
+                stringstream ss(thuocTinhVuKhi);
+                string loaiVuKhi, tenVuKhi, satThuongCoBanSTR, tocDoRaDonSTR;
+                float satThuongCoBan, tocDoRaDon;
 
-            getline(ss, loaiVuKhi, '|');
-            getline(ss, tenVuKhi, '|');
-            getline(ss, satThuongCoBanSTR, '|');
-            getline(ss, tocDoRaDonSTR, '|');
-            satThuongCoBan = stof(satThuongCoBanSTR);
-            tocDoRaDon = stof(tocDoRaDonSTR);
-            
-            if (loaiVuKhi == "KIEM") {
-                string doBenSTR;
-                int doBen;
-                getline(ss, doBenSTR, '|');
-                doBen = stoi(doBenSTR);
+                getline(ss, loaiVuKhi, '|');
+                getline(ss, tenVuKhi, '|');
+                getline(ss, satThuongCoBanSTR, '|');
+                getline(ss, tocDoRaDonSTR, '|');
+                satThuongCoBan = stof(satThuongCoBanSTR);
+                tocDoRaDon = stof(tocDoRaDonSTR);
+                
+                if (loaiVuKhi == "KIEM") {
+                    string doBenSTR;
+                    int doBen;
+                    getline(ss, doBenSTR, '|');
+                    doBen = stoi(doBenSTR);
 
-                Kiem* vk = new Kiem(doBen, tenVuKhi, satThuongCoBan, tocDoRaDon);
-                VuKhi* moi = vk;
-                ds.push_back(moi);
+                    Kiem* vk = new Kiem(doBen, tenVuKhi, satThuongCoBan, tocDoRaDon);
+                    VuKhi* moi = vk;
+                    ds.push_back(moi);
+                }
+
+                else if (loaiVuKhi == "SUNG") {
+                    string soLuongDanTrongOngSTR, tocDoThayBangSTR;
+                    int soLuongDanTrongOng;
+                    float tocDoThayBang;
+                    getline(ss, soLuongDanTrongOngSTR, '|');
+                    getline(ss, tocDoThayBangSTR, '|');
+                    soLuongDanTrongOng = stoi(soLuongDanTrongOngSTR);
+                    tocDoThayBang = stof(tocDoThayBangSTR);
+
+                    Sung* vk = new Sung(soLuongDanTrongOng, tocDoThayBang, tenVuKhi, satThuongCoBan, tocDoRaDon);
+                    VuKhi* moi = vk;
+                    ds.push_back(moi);
+                }
+                else if (loaiVuKhi == "PHEPTHUAT") {
+                    string loaiPhep, nangLuongTieuHaoSTR;
+                    int nangLuongTieuHao;
+
+                    getline(ss, loaiPhep, '|');
+                    getline(ss, nangLuongTieuHaoSTR, '|');
+                    nangLuongTieuHao = stoi(nangLuongTieuHaoSTR);
+
+                    PhepThuat* vk = new PhepThuat(loaiPhep, nangLuongTieuHao, tenVuKhi, satThuongCoBan, tocDoRaDon);
+                    VuKhi* moi = vk;
+                    ds.push_back(moi);
+                }
+                else {
+                    InLoi("Loai vu khi khong hop le: " + loaiVuKhi);
+                    continue;
+                }
+                InThongBao("Da them vu khi thanh cong.");
             }
-
-            else if (loaiVuKhi == "SUNG") {
-                string soLuongDanTrongOngSTR, tocDoThayBangSTR;
-                int soLuongDanTrongOng;
-                float tocDoThayBang;
-                getline(ss, soLuongDanTrongOngSTR, '|');
-                getline(ss, tocDoThayBangSTR, '|');
-                soLuongDanTrongOng = stoi(soLuongDanTrongOngSTR);
-                tocDoThayBang = stof(tocDoThayBangSTR);
-
-                Sung* vk = new Sung(soLuongDanTrongOng, tocDoThayBang, tenVuKhi, satThuongCoBan, tocDoRaDon);
-                VuKhi* moi = vk;
-                ds.push_back(moi);
-            }
-            else if (loaiVuKhi == "PHEPTHUAT") {
-                string loaiPhep, nangLuongTieuHaoSTR;
-                int nangLuongTieuHao;
-
-                getline(ss, loaiPhep, '|');
-                getline(ss, nangLuongTieuHaoSTR, '|');
-                nangLuongTieuHao = stoi(nangLuongTieuHaoSTR);
-
-                PhepThuat* vk = new PhepThuat(loaiPhep, nangLuongTieuHao, tenVuKhi, satThuongCoBan, tocDoRaDon);
-                VuKhi* moi = vk;
-                ds.push_back(moi);
+            catch (...) {
+                InLoi("Khong the nhap vu khi nay.");
+                continue;
             }
         }
-        InThongBao("Da them vu khi thanh cong.");
+        InThongBao("Hoan tat them vu khi tu file.");
     }
     else {
         cout << duongDanFile << endl;
