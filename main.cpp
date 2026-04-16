@@ -6,6 +6,8 @@
 #include <windows.h>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -481,7 +483,6 @@ VuKhi* TaoVuKhiTheoLuaChon() {
     return moi;
 }
 
-
 VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
     TieuDe("THEM VU KHI", MAU_VANG);
     VuKhi* vk = TaoVuKhiTheoLuaChon();
@@ -489,6 +490,72 @@ VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
     InThongBao("Da them vu khi thanh cong.");
     return vk;
 }
+
+void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
+    string duongDanFile, thuocTinhVuKhi;
+    cin.ignore();
+    cin.clear();
+    cout << "Nhap duong dan file txt: " ;
+    getline(cin, duongDanFile);
+
+    ifstream inp (duongDanFile);
+    if (inp.good()) {
+        while (getline(inp, thuocTinhVuKhi)){
+            stringstream ss(thuocTinhVuKhi);
+            string loaiVuKhi, tenVuKhi, satThuongCoBanSTR, tocDoRaDonSTR;
+            float satThuongCoBan, tocDoRaDon;
+
+            getline(ss, loaiVuKhi, '|');
+            getline(ss, tenVuKhi, '|');
+            getline(ss, satThuongCoBanSTR, '|');
+            getline(ss, tocDoRaDonSTR, '|');
+            satThuongCoBan = stof(satThuongCoBanSTR);
+            tocDoRaDon = stof(tocDoRaDonSTR);
+            
+            if (loaiVuKhi == "KIEM") {
+                string doBenSTR;
+                int doBen;
+                getline(ss, doBenSTR, '|');
+                doBen = stoi(doBenSTR);
+
+                Kiem* vk = new Kiem(doBen, tenVuKhi, satThuongCoBan, tocDoRaDon);
+                VuKhi* moi = vk;
+                ds.push_back(moi);
+            }
+
+            else if (loaiVuKhi == "SUNG") {
+                string soLuongDanTrongOngSTR, tocDoThayBangSTR;
+                int soLuongDanTrongOng;
+                float tocDoThayBang;
+                getline(ss, soLuongDanTrongOngSTR, '|');
+                getline(ss, tocDoThayBangSTR, '|');
+                soLuongDanTrongOng = stoi(soLuongDanTrongOngSTR);
+                tocDoThayBang = stof(tocDoThayBangSTR);
+
+                Sung* vk = new Sung(soLuongDanTrongOng, tocDoThayBang, tenVuKhi, satThuongCoBan, tocDoRaDon);
+                VuKhi* moi = vk;
+                ds.push_back(moi);
+            }
+            else if (loaiVuKhi == "PHEPTHUAT") {
+                string loaiPhep, nangLuongTieuHaoSTR;
+                int nangLuongTieuHao;
+
+                getline(ss, loaiPhep, '|');
+                getline(ss, nangLuongTieuHaoSTR, '|');
+                nangLuongTieuHao = stoi(nangLuongTieuHaoSTR);
+
+                PhepThuat* vk = new PhepThuat(loaiPhep, nangLuongTieuHao, tenVuKhi, satThuongCoBan, tocDoRaDon);
+                VuKhi* moi = vk;
+                ds.push_back(moi);
+            }
+        }
+        InThongBao("Da them vu khi thanh cong.");
+    }
+    else {
+        cout << duongDanFile << endl;
+        InLoi("Duong dan khong ton tai.");
+    }
+} 
 
 VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
     if (ds.empty()) {
@@ -926,6 +993,9 @@ int main() {
         }
 
         switch (luaChon) {
+            case -1:
+                ThemVuKhiTuFile(danhSachVK);
+                break;
             case 1:
                 TaoDuLieuMau(danhSach);
                 break;
