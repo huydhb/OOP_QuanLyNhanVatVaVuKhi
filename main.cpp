@@ -406,7 +406,7 @@ float PhepThuat::SatThuong(int t) {
     return soLanRaPhepTheoThoiGian * getSatThuongCoBan();
 }
 
-// ========================= CAC HAM KHOI TAO VA HIEN THI VA TRANG BI VU KHI =========================
+// ========================= CAC HAM KHOI TAO, HIEN THI VA TRANG BI VU KHI =========================
 void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
     if (ds.empty()) {
         InCanhBao("Danh sach vu khi dang rong.");
@@ -708,28 +708,7 @@ istream& operator>>(istream& in, NhanVat& nv) {
     nv.setTenNhanVat(ten);
     nv.setMau(mau);
     nv.setNangLuong(nangLuong);
-
-    cout << "Chon vu khi cho nhan vat:\n";
-    cout << "1. Chon vu khi tu kho\n2. Tao vu khi moi\n0. Khong trang bi\n";
-    cout << "Lua chon: ";
-    in >> luaChon;
-
-    VuKhi* moi = nullptr;
-    switch (luaChon) {
-        case 1: {
-            extern vector<VuKhi*> danhSachVK;
-            moi = ChonVuKhiTuDanhSach(danhSachVK);
-            break;
-        }
-        case 2: {
-            extern vector<VuKhi*> danhSachVK;
-            moi = ThemVuKhi(danhSachVK);
-            break;
-        }
-        default:
-            moi = nullptr;
-    }
-    nv.setVuKhi(moi);
+    nv.setVuKhi(nullptr);
     return in;
 }
 
