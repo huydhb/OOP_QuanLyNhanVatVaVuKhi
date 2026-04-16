@@ -10,8 +10,6 @@
 #include <sstream>
 
 using namespace std;
-void XoaBoDemNhap();
-VuKhi* SaoChepVuKhi(const VuKhi* src);
 // ========================= MAU CONSOLE =========================
 enum MauChu {
     MAU_MAC_DINH = 7,
@@ -576,6 +574,26 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
     }
 } 
 
+VuKhi* SaoChepVuKhi(const VuKhi* src) {
+    if (src == nullptr) return nullptr;
+
+    if (const Kiem* k = dynamic_cast<const Kiem*>(src)) {
+        return new Kiem(*k);
+    }
+    if (const Sung* s = dynamic_cast<const Sung*>(src)) {
+        return new Sung(*s);
+    }
+    if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(src)) {
+        return new PhepThuat(*p);
+    }
+    return nullptr;
+}
+
+void XoaBoDemNhap() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
 VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
     if (ds.empty()) {
         InCanhBao("Danh sach vu khi rong.");
@@ -636,20 +654,6 @@ public:
     void TanCongMucTieu(NhanVat& b, int t);
 };
 
-VuKhi* SaoChepVuKhi(const VuKhi* src) {
-    if (src == nullptr) return nullptr;
-
-    if (const Kiem* k = dynamic_cast<const Kiem*>(src)) {
-        return new Kiem(*k);
-    }
-    if (const Sung* s = dynamic_cast<const Sung*>(src)) {
-        return new Sung(*s);
-    }
-    if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(src)) {
-        return new PhepThuat(*p);
-    }
-    return nullptr;
-}
 
 string NhanVat::getTenNhanVat() const {
     return tenNhanVat;
@@ -824,11 +828,6 @@ void LamMoiManHinh() {
     system("cls");
 }
 
-void XoaBoDemNhap() {
-    cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-}
-
 void HienThiDanhSach(const vector<NhanVat>& ds) {
     if (ds.empty()) {
         InCanhBao("Danh sach nhan vat dang rong.");
@@ -895,6 +894,7 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
     cout << "1. Trang bi vu khi co san\n"
          << "2. Trang bi vu khi moi\n";
     
+    cout << "Nhap lua chon: ";
     cin >> opt;
     switch (opt) {
         case 1:
@@ -926,31 +926,86 @@ void TanCong(vector<NhanVat>& ds) {
 
     HienThiDanhSach(ds);
 
-    int a, b, t;
+    int a, b;
 
     setColor(MAU_VANG);
-    cout << "Chon nhan vat tan cong (1-" << ds.size() << "): ";
+    cout << "Chon nhan vat thu nhat (1-" << ds.size() << "): ";
     resetColor();
     cin >> a;
 
     setColor(MAU_VANG);
-    cout << "Chon muc tieu (1-" << ds.size() << "): ";
+    cout << "Chon nhan vat thu hai (1-" << ds.size() << "): ";
     resetColor();
     cin >> b;
 
-    setColor(MAU_VANG);
-    cout << "Nhap thoi gian tan cong t: ";
-    resetColor();
-    cin >> t;
-
-    if (a < 1 || a > static_cast<int>(ds.size()) ||
+    if (!cin || a < 1 || a > static_cast<int>(ds.size()) ||
         b < 1 || b > static_cast<int>(ds.size()) || a == b) {
+        XoaBoDemNhap();
         InLoi("Lua chon khong hop le.");
         return;
     }
 
-    TieuDe("KET QUA TAN CONG", MAU_DO);
-    ds[a - 1].TanCongMucTieu(ds[b - 1], t);
+    int luaChonTiepTuc = 1;
+
+    while (luaChonTiepTuc == 1) {
+        int t;
+
+        setColor(MAU_VANG);
+        cout << "Nhap thoi gian tan cong t: ";
+        resetColor();
+        cin >> t;
+
+        if (!cin || t <= 0) {
+            XoaBoDemNhap();
+            InLoi("Thoi gian tan cong phai la so nguyen > 0.");
+            continue;
+        }
+
+        TieuDe("KET QUA TAN CONG", MAU_DO);
+
+        // Nhan vat 1 tan cong nhan vat 2
+        ds[a - 1].TanCongMucTieu(ds[b - 1], t);
+
+        // Nhan vat 2 phan cong neu con song
+        if (ds[b - 1].getMau() > 0) {
+            ds[b - 1].TanCongMucTieu(ds[a - 1], t);
+        }
+
+        TieuDe("TRANG THAI SAU LUOT TAN CONG", MAU_XANH_LA);
+
+        setColor(MAU_TRANG_SANG);
+        cout << "[Nhan vat 1]\n";
+        resetColor();
+        cout << ds[a - 1] << '\n';
+
+        setColor(MAU_TRANG_SANG);
+        cout << "[Nhan vat 2]\n";
+        resetColor();
+        cout << ds[b - 1] << '\n';
+
+        if (ds[a - 1].getMau() <= 0 && ds[b - 1].getMau() <= 0) {
+            InThongBao("Ca hai nhan vat da bi ha guc. Ket thuc tran dau.");
+            break;
+        }
+        if (ds[a - 1].getMau() <= 0) {
+            InThongBao(ds[a - 1].getTenNhanVat() + " da bi ha guc. Ket thuc tran dau.");
+            break;
+        }
+        if (ds[b - 1].getMau() <= 0) {
+            InThongBao(ds[b - 1].getTenNhanVat() + " da bi ha guc. Ket thuc tran dau.");
+            break;
+        }
+
+        setColor(MAU_VANG);
+        cout << "1. Tan cong tiep\n0. Ket thuc tan cong\nLua chon: ";
+        resetColor();
+        cin >> luaChonTiepTuc;
+
+        if (!cin) {
+            XoaBoDemNhap();
+            luaChonTiepTuc = 0;
+        }
+    }
 }
 
 void InMenu() {
