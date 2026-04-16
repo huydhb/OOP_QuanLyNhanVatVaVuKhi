@@ -1,0 +1,5 @@
+KIEM|Long Kiem|50.5|1.2|10
+SUNG|AWM Sniper|120.0|2.5|5|3.5
+PHEPTHUAT|Thien Thach|200.0|4.0|Lua|50
+KIEM|Doan Dao|15.0|0.5|100
+SUNG|Luc Bac|20.0|0.8|12|1.5

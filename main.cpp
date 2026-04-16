@@ -10,7 +10,8 @@
 #include <sstream>
 
 using namespace std;
-
+void XoaBoDemNhap();
+VuKhi* SaoChepVuKhi(const VuKhi* src);
 // ========================= MAU CONSOLE =========================
 enum MauChu {
     MAU_MAC_DINH = 7,
@@ -486,15 +487,22 @@ VuKhi* TaoVuKhiTheoLuaChon() {
 VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
     TieuDe("THEM VU KHI", MAU_VANG);
     VuKhi* vk = TaoVuKhiTheoLuaChon();
+
+    if (vk == nullptr) {
+        InLoi("Them vu khi that bai.");
+        return nullptr;
+    }
+
     ds.push_back(vk);
     InThongBao("Da them vu khi thanh cong.");
-    return vk;
+    return vk; // tra ve con tro trong kho
 }
 
 void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
     string duongDanFile, thuocTinhVuKhi;
     cin.ignore();
     cin.clear();
+    cout << "Format: LOAI|tenVuKhi|satThuongCoBan|tocDoRaDon|thuocTinhRieng1|thuocTinhRieng2\n"; ;
     cout << "Nhap duong dan file txt: " ;
     getline(cin, duongDanFile);
 
@@ -582,17 +590,18 @@ VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
     resetColor();
     cin >> idx;
 
-    if (Kiem* k = dynamic_cast<Kiem*>(ds[idx - 1])) {
-        return k;
-    }
-    else if (Sung* s = dynamic_cast<Sung*>(ds[idx - 1])) {
-        return s;
-    }
-    else if (PhepThuat* p = dynamic_cast<PhepThuat*>(ds[idx - 1])) {
-        return p;
+    if (!cin || idx < 1 || idx > static_cast<int>(ds.size())) {
+        XoaBoDemNhap();
+        InLoi("Chi so vu khi khong hop le.");
+        return nullptr;
     }
 
-    return nullptr;
+    if (ds[idx - 1] == nullptr) {
+        InLoi("Vu khi khong ton tai.");
+        return nullptr;
+    }
+
+    return SaoChepVuKhi(ds[idx - 1]);
 }
 
 // ========================= LOP NHANVAT =========================
@@ -627,21 +636,19 @@ public:
     void TanCongMucTieu(NhanVat& b, int t);
 };
 
-namespace {
-    VuKhi* SaoChepVuKhi(const VuKhi* src) {
-        if (src == nullptr) return nullptr;
+VuKhi* SaoChepVuKhi(const VuKhi* src) {
+    if (src == nullptr) return nullptr;
 
-        if (const Kiem* k = dynamic_cast<const Kiem*>(src)) {
-            return new Kiem(*k);
-        }
-        if (const Sung* s = dynamic_cast<const Sung*>(src)) {
-            return new Sung(*s);
-        }
-        if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(src)) {
-            return new PhepThuat(*p);
-        }
-        return nullptr;
+    if (const Kiem* k = dynamic_cast<const Kiem*>(src)) {
+        return new Kiem(*k);
     }
+    if (const Sung* s = dynamic_cast<const Sung*>(src)) {
+        return new Sung(*s);
+    }
+    if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(src)) {
+        return new PhepThuat(*p);
+    }
+    return nullptr;
 }
 
 string NhanVat::getTenNhanVat() const {
@@ -708,7 +715,28 @@ istream& operator>>(istream& in, NhanVat& nv) {
     nv.setTenNhanVat(ten);
     nv.setMau(mau);
     nv.setNangLuong(nangLuong);
-    nv.setVuKhi(nullptr);
+
+    cout << "Chon vu khi cho nhan vat:\n";
+    cout << "1. Chon vu khi tu kho\n2. Tao vu khi moi\n0. Khong trang bi\n";
+    cout << "Lua chon: ";
+    in >> luaChon;
+
+    VuKhi* moi = nullptr;
+    switch (luaChon) {
+        case 1: {
+            extern vector<VuKhi*> danhSachVK;
+            moi = ChonVuKhiTuDanhSach(danhSachVK);
+            break;
+        }
+        case 2: {
+            extern vector<VuKhi*> danhSachVK;
+            moi = ThemVuKhi(danhSachVK);
+            break;
+        }
+        default:
+            moi = nullptr;
+    }
+    nv.setVuKhi(moi);
     return in;
 }
 
@@ -822,14 +850,18 @@ void HienThiDanhSach(const vector<NhanVat>& ds) {
     }
 }
 
-void TaoDuLieuMau(vector<NhanVat>& ds) {
-    ds.clear();
+void TaoDuLieuMau(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
+    // Tao vu khi mau trong kho
+    dsVK.push_back(new Kiem(12, "Excalibur", 18.5f, 1.0f));
+    dsVK.push_back(new Sung(30, 2.5f, "M4A1", 7.5f, 0.2f));
+    dsVK.push_back(new PhepThuat("Hoa cau", 15, "Truong lua", 25.0f, 1.5f));
 
-    ds.push_back(NhanVat("Arthur", 250.0f, 80, new Kiem(12, "Excalibur", 18.5f, 1.0f)));
-    ds.push_back(NhanVat("Rambo", 220.0f, 60, new Sung(30, 2.5f, "M4A1", 7.5f, 0.2f)));
-    ds.push_back(NhanVat("Merlin", 180.0f, 120, new PhepThuat("Hoa cau", 15, "Truong lua", 25.0f, 1.5f)));
+    // Nhan vat dung BAN SAO cua vu khi trong kho
+    ds.push_back(NhanVat("Arthur", 250.0f, 80, SaoChepVuKhi(dsVK[0])));
+    ds.push_back(NhanVat("Rambo", 220.0f, 60, SaoChepVuKhi(dsVK[1])));
+    ds.push_back(NhanVat("Merlin", 180.0f, 120, SaoChepVuKhi(dsVK[2])));
 
-    InThongBao("Da tao 3 nhan vat mau: Arthur, Rambo, Merlin.");
+    InThongBao("Da tao 3 nhan vat mau va 3 vu khi mau trong kho.");
 }
 
 void ThemNhanVat(vector<NhanVat>& ds) {
@@ -864,21 +896,26 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
          << "2. Trang bi vu khi moi\n";
     
     cin >> opt;
-
     switch (opt) {
         case 1:
-            moi = ChonVuKhiTuDanhSach(dsVK);
+            moi = ChonVuKhiTuDanhSach(dsVK); // ban sao
             break;
-        case 2:
-            moi = ThemVuKhi(dsVK);
+        case 2: {
+            VuKhi* vkKho = ThemVuKhi(dsVK);  // them vao kho
+            moi = SaoChepVuKhi(vkKho);       // nhan vat giu ban sao
             break;
+        }
         default:
             InLoi("Chi so khong hop le.");
             return;
     }
-        
+
+    if (moi == nullptr) {
+        InLoi("Khong the trang bi vu khi.");
+        return;
+    }
+
     ds[idx - 1].TrangBi(moi);
-    InThongBao("Da trang bi vu khi moi cho nhan vat.");
 }
 
 void TanCong(vector<NhanVat>& ds) {
@@ -916,51 +953,24 @@ void TanCong(vector<NhanVat>& ds) {
     ds[a - 1].TanCongMucTieu(ds[b - 1], t);
 }
 
-void SaoChepNhanVat(vector<NhanVat>& ds) {
-    if (ds.empty()) {
-        InCanhBao("Danh sach rong.");
-        return;
-    }
-
-    HienThiDanhSach(ds);
-
-    int idx;
-    setColor(MAU_VANG);
-    cout << "Chon nhan vat can sao chep (1-" << ds.size() << "): ";
-    resetColor();
-    cin >> idx;
-
-    if (idx < 1 || idx > static_cast<int>(ds.size())) {
-        InLoi("Chi so khong hop le.");
-        return;
-    }
-
-    NhanVat banSao(ds[idx - 1]);
-    banSao.setTenNhanVat(ds[idx - 1].getTenNhanVat() + "_Copy");
-    ds.push_back(banSao);
-
-    InThongBao("Da sao chep nhan vat bang copy constructor.");
-}
-
 void InMenu() {
-    TieuDe("CHUONG TRINH QUAN LY NHAN VAT - VU KHI THEO UML", MAU_TIM);
+    TieuDe("CHUONG TRINH QUAN LY NHAN VAT - VU KHI", MAU_TIM);
 
     setColor(MAU_XANH_DUONG);
     cout << left
-         << setw(6) << "1." << "Tao du lieu mau\n"
-         << setw(6) << "2." << "Them nhan vat moi (co chon vu khi)\n"
-         << setw(6) << "3." << "Them vu khi moi\n"
-         << setw(6) << "4." << "Them vu khi moi tu file\n"
-         << setw(6) << "5." << "Hien thi danh sach nhan vat\n"
-         << setw(6) << "6." << "Hien thi danh sach cac loai vu khi trong kho\n"
-         << setw(6) << "7." << "Trang bi / thay vu khi cho nhan vat\n"
-         << setw(6) << "8." << "Nhan vat tan cong muc tieu\n"
-         << setw(6) << "9." << "Sao chep nhan vat (copy constructor)\n"
+         << setw(6) << "1." << "Tạo dữ liệu mẫu \n"
+         << setw(6) << "2." << "Thêm nhân vật\n"
+         << setw(6) << "3." << "Thêm vũ khí\n"
+         << setw(6) << "4." << "Thêm vũ khí mới từ file\n"
+         << setw(6) << "5." << "Hiển thị danh sách nhân vật\n"
+         << setw(6) << "6." << "Hiển thị danh sách các loại vũ khí trong kho\n"
+         << setw(6) << "7." << "Trang bị / thay vũ khí cho nhân vật\n"
+         << setw(6) << "8." << "Nhân vật tấn công mục tiêu\n"
          << setw(6) << "0." << "Thoat\n";
     resetColor();
 
     setColor(MAU_VANG);
-    cout << "Nhap lua chon: ";
+    cout << "Nhập lựa chọn: ";
     resetColor();
 }
 
@@ -985,7 +995,7 @@ int main() {
 
         switch (luaChon) {
             case 1:
-                TaoDuLieuMau(danhSach);
+                TaoDuLieuMau(danhSach, danhSachVK);
                 break;
             case 2:
                 ThemNhanVat(danhSach);
@@ -1007,9 +1017,6 @@ int main() {
                 break;
             case 8:
                 TanCong(danhSach);
-                break;
-            case 9:
-                SaoChepNhanVat(danhSach);
                 break;
             case 0:
                 InThongBao("Tam biet!");
