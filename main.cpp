@@ -8,10 +8,13 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <ctime>
+#include <cstdlib>
 
 using namespace std;
 // ========================= TIEN ICH HIEN THI =========================
 enum MauChu {
+    MAU_CYAN = 3,
     MAU_MAC_DINH = 7,
     MAU_XANH_DUONG = 9,
     MAU_XANH_LA = 10,
@@ -32,7 +35,12 @@ void resetColor() {
 void TieuDe(const string& s, int color = MAU_XANH_DUONG) {
     setColor(color);
     cout << "\n============================================================\n";
-    cout << s << '\n';
+    int padding = (60 - s.length()) / 2;
+    if (padding > 0) {
+        cout << string(padding, ' ') << s << '\n';
+    } else {
+        cout << s << '\n';
+    }
     cout << "============================================================\n";
     resetColor();
 }
@@ -149,18 +157,26 @@ public:
     }
 
     friend ostream& operator<<(ostream& out, const Kiem& k) {
-        out << left
-            << setw(18) << "Loai vu khi:" << "Kiem\n"
-            << setw(18) << "Ten vu khi:" << k.getTenVuKhi() << '\n'
-            << setw(18) << "ST co ban:" << fixed << setprecision(2) << k.getSatThuongCoBan() << '\n'
-            << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << k.getTocDoRaDon() << '\n'
-            << setw(18) << "Do ben:" << k.doBen;
+        setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
+        resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Kiem";
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Ten vu khi:" << setw(20) << k.getTenVuKhi();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "ST co ban:" << fixed << setprecision(2) << setw(20) << k.getSatThuongCoBan();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << setw(20) << k.getTocDoRaDon();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Do ben:" << setw(20) << k.doBen;
+        setColor(MAU_CYAN); out << "|\n  +---------------------------------------+";
+        resetColor();
         return out;
     }
 
     // 4. virtual method
     void TanCong() override {
-        cout << "[Kiem] Thuc hien mot chuoi chem bang kiem.\n";
+        setColor(MAU_XANH_LA);
+        cout << "  [Kiem] Thuc hien mot chuoi chem lien hoan.\n";
+        resetColor();
     }
 
     float SatThuong(int t) override {
@@ -235,19 +251,28 @@ public:
     }
 
     friend ostream& operator<<(ostream& out, const Sung& s) {
-        out << left
-            << setw(22) << "Loai vu khi:" << "Sung\n"
-            << setw(22) << "Ten vu khi:" << s.getTenVuKhi() << '\n'
-            << setw(22) << "ST co ban:" << fixed << setprecision(2) << s.getSatThuongCoBan() << '\n'
-            << setw(22) << "Toc do ra don:" << fixed << setprecision(2) << s.getTocDoRaDon() << '\n'
-            << setw(22) << "Dan trong ong:" << s.soLuongDanTrongOng << '\n'
-            << setw(22) << "Toc do thay bang:" << fixed << setprecision(2) << s.tocDoThayBang;
+        setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
+        resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Sung";
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Ten vu khi:" << setw(20) << s.getTenVuKhi();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "ST co ban:" << fixed << setprecision(2) << setw(20) << s.getSatThuongCoBan();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << setw(20) << s.getTocDoRaDon();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Dan trong ong:" << setw(20) << s.soLuongDanTrongOng;
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Toc do thay bang:" << fixed << setprecision(2) << setw(20) << s.tocDoThayBang;
+        setColor(MAU_CYAN); out << "|\n  +---------------------------------------+";
+        resetColor();
         return out;
     }
 
     //4. virtual method
     void TanCong() override {
-        cout << "[Sung] Nha dan vao muc tieu.\n";
+        setColor(MAU_VANG);
+        cout << "  [Sung] Xa dan lien tuc vao muc tieu.\n";
+        resetColor();
     }
 
     float SatThuong(int t) override {
@@ -326,19 +351,28 @@ public:
     }
 
     friend ostream& operator<<(ostream& out, const PhepThuat& p) {
-        out << left
-            << setw(24) << "Loai vu khi:" << "PhepThuat\n"
-            << setw(24) << "Ten vu khi:" << p.getTenVuKhi() << '\n'
-            << setw(24) << "ST co ban:" << fixed << setprecision(2) << p.getSatThuongCoBan() << '\n'
-            << setw(24) << "Toc do ra don:" << fixed << setprecision(2) << p.getTocDoRaDon() << '\n'
-            << setw(24) << "Loai phep:" << p.loaiPhep << '\n'
-            << setw(24) << "NL tieu hao:" << p.nangLuongTieuHao;
+        setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
+        resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Phep Thuat";
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Ten vu khi:" << setw(20) << p.getTenVuKhi();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "ST co ban:" << fixed << setprecision(2) << setw(20) << p.getSatThuongCoBan();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << setw(20) << p.getTocDoRaDon();
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "Loai phep:" << setw(20) << p.loaiPhep;
+        setColor(MAU_CYAN); out << "|\n  | ";
+        resetColor(); out << setw(18) << "NL tieu hao:" << setw(20) << p.nangLuongTieuHao;
+        setColor(MAU_CYAN); out << "|\n  +---------------------------------------+";
+        resetColor();
         return out;
     }
 
     // 4. virtual method
     void TanCong() override {
-        cout << "[PhepThuat] Tung ra mot loat phep thuat.\n";
+        setColor(MAU_TIM);
+        cout << "  [Phep Thuat] Tung ra cac don ma thuat uy luc.\n";
+        resetColor();
     }
 
     float SatThuong(int t) override {
@@ -354,6 +388,12 @@ public:
 /**
  * @brief In toàn bộ vũ khí trong kho
  */
+
+void XoaBoDemNhap() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
 void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
     if (ds.empty()) {
         InCanhBao("Danh sach vu khi dang rong.");
@@ -362,27 +402,82 @@ void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
 
     TieuDe("DANH SACH CAC LOAI VU KHI TRONG KHO", MAU_XANH_LA);
 
+    setColor(MAU_DO);
+    cout << "+====+============+====================+===========+===============+\n";
+    cout << "|"; resetColor(); cout << left << setw(4) << "STT";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(12) << " Loai Vu Khi";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20) << " Ten Vu Khi";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(11) << " ST Co Ban";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(15) << " Toc Do Ra Don";
+    setColor(MAU_DO); cout << "|\n";
+    cout << "+====+============+====================+===========+===============+\n";
+    
     for (size_t i = 0; i < ds.size(); ++i) {
-        setColor(MAU_TRANG_SANG);
-        cout << "[Vu Khi " << i + 1 << "]\n";
-        resetColor();
-
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << left << setw(3) << i + 1;
+        
         if (ds[i] == nullptr) {
-            cout << "Vu khi khong ton tai.\n";
-        }
-        else if (const Kiem* k = dynamic_cast<const Kiem*>(ds[i])) {
-            cout << *k << '\n';
-        }
-        else if (const Sung* s = dynamic_cast<const Sung*>(ds[i])) {
-            cout << *s << '\n';
-        }
-        else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(ds[i])) {
-            cout << *p << '\n';
+            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(11) << "NULL";
+            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19) << "Khong ton tai";
+            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(10) << "";
+            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(14) << "";
+            setColor(MAU_DO); cout << "|\n";
+            continue;
         }
 
-        setColor(MAU_XANH_DUONG);
-        cout << "------------------------------------------------------------\n";
+        string loaiVK = "Khong Ro";
+        if (dynamic_cast<const Kiem*>(ds[i])) loaiVK = "Kiem";
+        else if (dynamic_cast<const Sung*>(ds[i])) loaiVK = "Sung";
+        else if (dynamic_cast<const PhepThuat*>(ds[i])) loaiVK = "Phep Thuat";
+
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(11) << loaiVK;
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19) << ds[i]->getTenVuKhi();
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << fixed << setprecision(2) << setw(10) << ds[i]->getSatThuongCoBan();
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << fixed << setprecision(2) << setw(14) << ds[i]->getTocDoRaDon();
+        setColor(MAU_DO); cout << "|\n";
+    }
+    cout << "+====+============+====================+===========+===============+\n";
+    resetColor();
+}
+
+void XemChiTietVuKhi(const vector<VuKhi*>& ds) {
+    if (ds.empty()) {
+        InCanhBao("Danh sach vu khi dang rong.");
+        return;
+    }
+
+    HienThiDanhSachVK(ds);
+
+    int chon = -1;
+    while (true) {
+        setColor(MAU_VANG);
+        cout << "\nNhap STT vu khi de xem chi tiet (0 de quay lai): ";
         resetColor();
+        cin >> chon;
+        
+        if (!cin) {
+            XoaBoDemNhap();
+            continue;
+        }
+        if (chon == 0) break;
+        if (chon > 0 && chon <= static_cast<int>(ds.size())) {
+            cout << "\n";
+            if (ds[chon - 1] == nullptr) {
+                InLoi("Vu khi khong ton tai.");
+                continue;
+            }
+            setColor(MAU_VANG);
+            cout << " >> [Chi tiet Vu khi " << chon << "] <<\n";
+            resetColor();
+            if (const Kiem* k = dynamic_cast<const Kiem*>(ds[chon - 1])) {
+                cout << *k << '\n';
+            } else if (const Sung* s = dynamic_cast<const Sung*>(ds[chon - 1])) {
+                cout << *s << '\n';
+            } else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(ds[chon - 1])) {
+                cout << *p << '\n';
+            }
+        } else {
+            InLoi("STT khong hop le.");
+        }
     }
 }
 
@@ -563,11 +658,6 @@ VuKhi* SaoChepVuKhi(const VuKhi* src) {
     return nullptr;
 }
 
-void XoaBoDemNhap() {
-    cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-}
-
 /**
  * @brief Cho người dùng chọn 1 vũ khí từ kho và trả về bản sao của vũ khí đó.
  */
@@ -686,28 +776,39 @@ public:
     }
     
     friend ostream& operator<<(ostream& out, const NhanVat& nv) {
-    out << left
-        << setw(18) << "Ten nhan vat:" << nv.tenNhanVat << '\n'
-        << setw(18) << "Mau:" << fixed << setprecision(2) << nv.mau << '\n'
-        << setw(18) << "Nang luong:" << nv.nangLuong << '\n'
-        << setw(18) << "Trang thai:" << ((nv.mau > 0) ? "Con song" : "Da bi ha guc") << '\n';
+        setColor(MAU_XANH_LA); out << "+=========================================+\n| ";
+        resetColor(); out << left << setw(18) << "Ten nhan vat:" << setw(20) << nv.tenNhanVat;
+        setColor(MAU_XANH_LA); out << "|\n| ";
+        resetColor(); out << setw(18) << "Mau:" << fixed << setprecision(2) << setw(20) << nv.mau;
+        setColor(MAU_XANH_LA); out << "|\n| ";
+        resetColor(); out << setw(18) << "Nang luong:" << setw(20) << nv.nangLuong;
+        setColor(MAU_XANH_LA); out << "|\n| ";
+        resetColor(); out << setw(18) << "Trang thai:" << setw(20) << ((nv.mau > 0) ? "Con song" : "Da bi ha guc");
+        setColor(MAU_XANH_LA); out << "|\n| ";
+        resetColor(); out << setw(18) << "Vu khi:";
+        
+        if (nv.vk == nullptr) {
+            out << setw(20) << "Khong co";
+            setColor(MAU_XANH_LA); out << "|\n+=========================================+\n";
+            resetColor();
+            return out;
+        } else {
+            out << setw(20) << "";
+            setColor(MAU_XANH_LA); out << "|\n";
+            resetColor();
+        }
 
-    out << setw(18) << "Vu khi:";
-    if (nv.vk == nullptr) {
-        out << "Khong co\n";
+        if (const Kiem* k = dynamic_cast<const Kiem*>(nv.vk)) {
+            out << *k << '\n';
+        } else if (const Sung* s = dynamic_cast<const Sung*>(nv.vk)) {
+            out << *s << '\n';
+        } else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(nv.vk)) {
+            out << *p << '\n';
+        }
+        setColor(MAU_XANH_LA); out << "+=========================================+";
+        resetColor();
         return out;
     }
-
-    out << '\n';
-    if (const Kiem* k = dynamic_cast<const Kiem*>(nv.vk)) {
-        out << *k << '\n';
-    } else if (const Sung* s = dynamic_cast<const Sung*>(nv.vk)) {
-        out << *s << '\n';
-    } else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(nv.vk)) {
-        out << *p << '\n';
-    }
-    return out;
-}
     //4. extend method
     void TrangBi(VuKhi* v) {
         setVuKhi(v);
@@ -734,40 +835,55 @@ public:
      */
     void TanCongMucTieu(NhanVat& b, int t) {
         if (vk == nullptr) {
-            cout << tenNhanVat << " chua co vu khi de tan cong.\n";
+            InLoi("  [!] " + tenNhanVat + " chua co vu khi de tan cong.");
             return;
-    }
-    if (mau <= 0) {
-        cout << tenNhanVat << " da bi ha guc nen khong the tan cong.\n";
-        return;
-    }
-    if (b.mau <= 0) {
-        cout << b.tenNhanVat << " da bi ha guc.\n";
-        return;
-    }
-    if (t <= 0) {
-        cout << "Thoi gian tan cong phai > 0.\n";
-        return;
-    }
-    float satThuong = 0;
-    // Xử lí riêng cho PhepThuat vì công thức UML cần năng lượng của NhanVat
-    if (PhepThuat* p = dynamic_cast<PhepThuat*>(vk)) {
-        if (p->getTocDoRaDon() > 0 && p->getNangLuongTieuHao() > 0) {
-            int soLanRaPhepTheoThoiGian = static_cast<int>(floor(t / p->getTocDoRaDon()));
-            int soLanRaPhepTheoNangLuong = nangLuong / p->getNangLuongTieuHao();
-            int soLanRaPhep = min(soLanRaPhepTheoThoiGian, soLanRaPhepTheoNangLuong);
-            satThuong = soLanRaPhep * p->getSatThuongCoBan();
-            int nangLuongDaDung = soLanRaPhep * p->getNangLuongTieuHao();
-            nangLuong -= nangLuongDaDung;
-        } else {
-            satThuong = p->SatThuong(t);
         }
-    } else {
-        satThuong = vk->SatThuong(t);
-    }
-    vk->TanCong();
-    b.NhanSatThuong(satThuong);
-    cout << tenNhanVat << " gay ra " << fixed << setprecision(2) << satThuong << " sat thuong len " << b.tenNhanVat << ".\n";
+        if (mau <= 0) {
+            InLoi("  [!] " + tenNhanVat + " da bi ha guc nen khong the tan cong.");
+            return;
+        }
+        if (b.mau <= 0) {
+            InLoi("  [!] " + b.tenNhanVat + " da bi ha guc.");
+            return;
+        }
+        if (t <= 0) {
+            InLoi("  [!] Thoi gian tan cong phai > 0.");
+            return;
+        }
+        
+        float satThuong = 0;
+        // Xử lí riêng cho PhepThuat vì công thức UML cần năng lượng của NhanVat
+        if (PhepThuat* p = dynamic_cast<PhepThuat*>(vk)) {
+            if (p->getTocDoRaDon() > 0 && p->getNangLuongTieuHao() > 0) {
+                int soLanRaPhepTheoThoiGian = static_cast<int>(floor(t / p->getTocDoRaDon()));
+                int soLanRaPhepTheoNangLuong = nangLuong / p->getNangLuongTieuHao();
+                int soLanRaPhep = min(soLanRaPhepTheoThoiGian, soLanRaPhepTheoNangLuong);
+                satThuong = soLanRaPhep * p->getSatThuongCoBan();
+                int nangLuongDaDung = soLanRaPhep * p->getNangLuongTieuHao();
+                nangLuong -= nangLuongDaDung;
+            } else {
+                satThuong = p->SatThuong(t);
+            }
+        } else {
+            satThuong = vk->SatThuong(t);
+        }
+        
+        vk->TanCong();
+        b.NhanSatThuong(satThuong);
+        
+        setColor(MAU_VANG);
+        cout << "  >>> ";
+        setColor(MAU_XANH_DUONG);
+        cout << tenNhanVat;
+        setColor(MAU_TRANG_SANG);
+        cout << " gay ra ";
+        setColor(MAU_DO);
+        cout << fixed << setprecision(2) << satThuong;
+        setColor(MAU_TRANG_SANG);
+        cout << " sat thuong len ";
+        setColor(MAU_XANH_DUONG);
+        cout << b.tenNhanVat << "!\n\n";
+        resetColor();
     }
 };
 
@@ -785,16 +901,63 @@ void HienThiDanhSach(const vector<NhanVat>& ds) {
 
     TieuDe("DANH SACH NHAN VAT", MAU_XANH_LA);
 
+    setColor(MAU_DO);
+    cout << "+====+====================+========+========+====================+\n";
+    cout << "|"; resetColor(); cout << left << setw(4) << "STT";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20) << " Ten Nhan Vat";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(8) << " Mau";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(8) << " N.Luong";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20) << " Vu Khi (Ten)";
+    setColor(MAU_DO); cout << "|\n";
+    cout << "+====+====================+========+========+====================+\n";
+    
     for (size_t i = 0; i < ds.size(); ++i) {
-        setColor(MAU_TRANG_SANG);
-        cout << "[Nhan vat " << i + 1 << "]\n";
-        resetColor();
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << left << setw(3) << i + 1;
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19) << ds[i].getTenNhanVat();
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << fixed << setprecision(2) << setw(7) << ds[i].getMau();
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(7) << ds[i].getNangLuong();
+        setColor(MAU_DO); cout << "| "; resetColor(); 
+        
+        string tenVK = "Khong co";
+        if (ds[i].getVuKhi() != nullptr) {
+            tenVK = ds[i].getVuKhi()->getTenVuKhi();
+        }
+        cout << setw(19) << tenVK;
+        setColor(MAU_DO); cout << "|\n";
+    }
+    cout << "+====+====================+========+========+====================+\n";
+    resetColor();
+}
 
-        cout << ds[i] << '\n';
+void XemChiTietNhanVat(const vector<NhanVat>& ds) {
+    if (ds.empty()) {
+        InCanhBao("Danh sach nhan vat dang rong.");
+        return;
+    }
 
-        setColor(MAU_XANH_DUONG);
-        cout << "------------------------------------------------------------\n";
+    HienThiDanhSach(ds);
+
+    int chon = -1;
+    while (true) {
+        setColor(MAU_VANG);
+        cout << "\nNhap STT nhan vat de xem chi tiet (0 de quay lai): ";
         resetColor();
+        cin >> chon;
+        
+        if (!cin) {
+            XoaBoDemNhap();
+            continue;
+        }
+        if (chon == 0) break;
+        if (chon > 0 && chon <= static_cast<int>(ds.size())) {
+            cout << "\n";
+            setColor(MAU_VANG);
+            cout << " >> [Chi tiet Nhan vat " << chon << "] <<\n";
+            resetColor();
+            cout << ds[chon - 1] << "\n";
+        } else {
+            InLoi("STT khong hop le.");
+        }
     }
 }
 
@@ -875,6 +1038,73 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
     ds[idx - 1].TrangBi(moi);
 }
 
+vector<string> splitLines(const string& s) {
+    vector<string> lines;
+    stringstream ss(s);
+    string line;
+    while (getline(ss, line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        lines.push_back(line);
+    }
+    return lines;
+}
+
+void InDongCoMau(string line, int mauKhung) {
+    if (line.empty()) {
+        cout << string(43, ' ');
+        return;
+    }
+    if (line.find("+===") != string::npos) {
+        setColor(mauKhung); cout << left << setw(43) << line; resetColor();
+    }
+    else if (line.find("+---") != string::npos) {
+        setColor(MAU_CYAN); cout << left << setw(43) << line; resetColor();
+    }
+    else if (line.find("| ") == 0) {
+        setColor(mauKhung); cout << "| "; resetColor();
+        string content = line.substr(2);
+        if (!content.empty() && content.back() == '|') content.pop_back();
+        cout << left << setw(40) << content;
+        setColor(mauKhung); cout << "|"; resetColor();
+    }
+    else if (line.find("  | ") == 0) {
+        setColor(MAU_CYAN); cout << "  | "; resetColor();
+        string content = line.substr(4);
+        if (!content.empty() && content.back() == '|') content.pop_back();
+        cout << left << setw(38) << content;
+        setColor(MAU_CYAN); cout << "|"; resetColor();
+    }
+    else {
+        cout << left << setw(43) << line;
+    }
+}
+
+void HienThiHaiNhanVatSongSong(const NhanVat& nv1, const NhanVat& nv2) {
+    stringstream ss1, ss2;
+    ss1 << nv1;
+    ss2 << nv2;
+    
+    vector<string> lines1 = splitLines(ss1.str());
+    vector<string> lines2 = splitLines(ss2.str());
+    
+    size_t maxLines = max(lines1.size(), lines2.size());
+    
+    setColor(MAU_VANG);
+    cout << " >> [Nhan vat 1]" << string(31, ' ') << " >> [Nhan vat 2]\n";
+    resetColor();
+
+    for (size_t i = 0; i < maxLines; ++i) {
+        string l1 = (i < lines1.size()) ? lines1[i] : "";
+        string l2 = (i < lines2.size()) ? lines2[i] : "";
+        
+        InDongCoMau(l1, MAU_XANH_LA);
+        cout << "    "; 
+        InDongCoMau(l2, MAU_XANH_DUONG); 
+        cout << "\n";
+    }
+    cout << "\n";
+}
+
 void TanCong(vector<NhanVat>& ds) {
     if (ds.size() < 2) {
         InCanhBao("Can it nhat 2 nhan vat de mo phong tan cong.");
@@ -919,22 +1149,25 @@ void TanCong(vector<NhanVat>& ds) {
         }
 
         TieuDe("KET QUA TAN CONG", MAU_DO);
-        ds[a - 1].TanCongMucTieu(ds[b - 1], t);
-        if (ds[b - 1].getMau() > 0) {
+        
+        int turn = rand() % 2;
+        if (turn == 0) {
+            InThongBao(" -> " + ds[a - 1].getTenNhanVat() + " gianh duoc quyen tan cong truoc!");
+            ds[a - 1].TanCongMucTieu(ds[b - 1], t);
+            if (ds[b - 1].getMau() > 0) {
+                ds[b - 1].TanCongMucTieu(ds[a - 1], t);
+            }
+        } else {
+            InThongBao(" -> " + ds[b - 1].getTenNhanVat() + " gianh duoc quyen tan cong truoc!");
             ds[b - 1].TanCongMucTieu(ds[a - 1], t);
+            if (ds[a - 1].getMau() > 0) {
+                ds[a - 1].TanCongMucTieu(ds[b - 1], t);
+            }
         }
 
         TieuDe("TRANG THAI SAU LUOT TAN CONG", MAU_XANH_LA);
 
-        setColor(MAU_TRANG_SANG);
-        cout << "[Nhan vat 1]\n";
-        resetColor();
-        cout << ds[a - 1] << '\n';
-
-        setColor(MAU_TRANG_SANG);
-        cout << "[Nhan vat 2]\n";
-        resetColor();
-        cout << ds[b - 1] << '\n';
+        HienThiHaiNhanVatSongSong(ds[a - 1], ds[b - 1]);
 
         if (ds[a - 1].getMau() <= 0 && ds[b - 1].getMau() <= 0) {
             InThongBao("Ca hai nhan vat da bi ha guc. Ket thuc tran dau.");
@@ -987,6 +1220,7 @@ vector<VuKhi*> danhSachVK;
 
 // ========================= MAIN =========================
 int main() {
+    srand(static_cast<unsigned>(time(0)));
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
     int luaChon;
@@ -1015,10 +1249,10 @@ int main() {
                 ThemVuKhiTuFile(danhSachVK);
                 break;
             case 5:
-                HienThiDanhSach(danhSach);
+                XemChiTietNhanVat(danhSach);
                 break;
             case 6:
-                HienThiDanhSachVK(danhSachVK);
+                XemChiTietVuKhi(danhSachVK);
                 break;
             case 7:
                 TrangBiChoNhanVat(danhSach, danhSachVK);
