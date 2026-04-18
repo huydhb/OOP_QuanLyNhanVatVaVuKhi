@@ -768,10 +768,7 @@ public:
     nv.setTenNhanVat(ten);
     nv.setMau(mau);
     nv.setNangLuong(nangLuong);
-<<<<<<< HEAD
     nv.setVuKhi(nullptr);
-=======
->>>>>>> 093ef21 (refactor: inline class methods)
     return in;
     }
     
