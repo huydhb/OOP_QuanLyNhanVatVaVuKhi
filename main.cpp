@@ -10,7 +10,7 @@
 #include <sstream>
 
 using namespace std;
-// ========================= MAU CONSOLE =========================
+// ========================= TIEN ICH HIEN THI =========================
 enum MauChu {
     MAU_MAC_DINH = 7,
     MAU_XANH_DUONG = 9,
@@ -169,6 +169,8 @@ public:
         int soLanChemTheoThoiGian = static_cast<int>(floor(t / getTocDoRaDon()));
         int soLanChem = min(doBen, soLanChemTheoThoiGian);
         float satThuong = soLanChem * getSatThuongCoBan();
+
+        // Sau khi sử dụng, doBen giảm theo số lần chém thực tế
         doBen -= soLanChem;
         return satThuong;
     }
@@ -348,7 +350,10 @@ public:
 };
 
 
-// ========================= CAC HAM KHOI TAO, HIEN THI VA TRANG BI VU KHI =========================
+// ========================= CAC HAM VE VU KHI =========================
+/**
+ * @brief In toàn bộ vũ khí trong kho
+ */
 void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
     if (ds.empty()) {
         InCanhBao("Danh sach vu khi dang rong.");
@@ -381,6 +386,9 @@ void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
     }
 }
 
+/**
+ * @brief Tạo vũ khí mới dựa trên lựa chọn của người dùng.
+ */
 VuKhi* TaoVuKhiTheoLuaChon() {
     int chon;
 
@@ -425,6 +433,10 @@ VuKhi* TaoVuKhiTheoLuaChon() {
     return moi;
 }
 
+/**
+ * @brief Thêm vũ khí mới vào kho.
+ * @return Con trỏ vũ khí vừa được thêm vào kho.
+ */
 VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
     TieuDe("THEM VU KHI", MAU_VANG);
     VuKhi* vk = TaoVuKhiTheoLuaChon();
@@ -439,6 +451,14 @@ VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
     return vk; 
 }
 
+/**
+ * @brief Đọc danh sách vũ khí từ file text.
+ *
+ * Định dạng mỗi dòng:
+ * KIEM|tenVuKhi|satThuongCoBan|tocDoRaDon|doBen
+ * SUNG|tenVuKhi|satThuongCoBan|tocDoRaDon|soLuongDanTrongOng|tocDoThayBang
+ * PHEPTHUAT|tenVuKhi|satThuongCoBan|tocDoRaDon|loaiPhep|nangLuongTieuHao
+ */
 void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
     string duongDanFile, thuocTinhVuKhi;
     cin.ignore();
@@ -527,6 +547,7 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
  * @param src Con trỏ tới vũ khí nguồn.
  * @return Con trỏ tới bản sao mới tạo; trả về nullptr nếu src rỗng hoặc kiểu không hỗ trợ.
  */
+
 VuKhi* SaoChepVuKhi(const VuKhi* src) {
     if (src == nullptr) return nullptr;
 
@@ -547,6 +568,9 @@ void XoaBoDemNhap() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
+/**
+ * @brief Cho người dùng chọn 1 vũ khí từ kho và trả về bản sao của vũ khí đó.
+ */
 VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
     if (ds.empty()) {
         InCanhBao("Danh sach vu khi rong.");
@@ -726,7 +750,7 @@ public:
         return;
     }
     float satThuong = 0;
-    // Xu ly rieng cho PhepThuat vi cong thuc UML can nang luong cua NhanVat
+    // Xử lí riêng cho PhepThuat vì công thức UML cần năng lượng của NhanVat
     if (PhepThuat* p = dynamic_cast<PhepThuat*>(vk)) {
         if (p->getTocDoRaDon() > 0 && p->getNangLuongTieuHao() > 0) {
             int soLanRaPhepTheoThoiGian = static_cast<int>(floor(t / p->getTocDoRaDon()));
@@ -775,12 +799,10 @@ void HienThiDanhSach(const vector<NhanVat>& ds) {
 }
 
 void TaoDuLieuMau(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
-    // Tao vu khi mau trong kho
     dsVK.push_back(new Kiem(12, "Excalibur", 18.5f, 1.0f));
     dsVK.push_back(new Sung(30, 2.5f, "M4A1", 7.5f, 0.2f));
     dsVK.push_back(new PhepThuat("Hoa cau", 15, "Truong lua", 25.0f, 1.5f));
 
-    // Nhan vat dung BAN SAO cua vu khi trong kho
     ds.push_back(NhanVat("Arthur", 250.0f, 80, SaoChepVuKhi(dsVK[0])));
     ds.push_back(NhanVat("Rambo", 220.0f, 60, SaoChepVuKhi(dsVK[1])));
     ds.push_back(NhanVat("Merlin", 180.0f, 120, SaoChepVuKhi(dsVK[2])));
@@ -796,6 +818,14 @@ void ThemNhanVat(vector<NhanVat>& ds) {
     InThongBao("Da them nhan vat thanh cong.");
 }
 
+/**
+ * @brief Trang bị hoặc thay thế vũ khí cho nhân vật.
+ * @details 
+ * - Nếu chọn vũ khí đã có trong kho: Nhân vật sẽ nhận một BẢN SAO (clone) của vũ khí đó.
+ * - Nếu tạo vũ khí mới: Vũ khí này sẽ được thêm vào kho đồ trước, sau đó nhân vật 
+ * sẽ nhận một BẢN SAO của nó để sử dụng.
+ * @note Điều này đảm bảo vũ khí gốc trong kho không bị thay đổi thuộc tính khi nhân vật sử dụng.
+ */
 void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
     if (ds.empty()) {
         InCanhBao("Chua co nhan vat nao.");
@@ -826,6 +856,8 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
             moi = ChonVuKhiTuDanhSach(dsVK); 
             break;
         case 2: {
+            // Tạo vũ khí mới, lưu vào kho, sau đó nhân vật nhận bản sao.
+            // Cách này tránh lỗi chia sẻ chung 1 con trỏ giữa kho và nhân vật.
             VuKhi* vkKho = ThemVuKhi(dsVK);  
             moi = SaoChepVuKhi(vkKho);      
             break;
@@ -887,11 +919,7 @@ void TanCong(vector<NhanVat>& ds) {
         }
 
         TieuDe("KET QUA TAN CONG", MAU_DO);
-
-        // Nhan vat 1 tan cong nhan vat 2
         ds[a - 1].TanCongMucTieu(ds[b - 1], t);
-
-        // Nhan vat 2 phan cong neu con song
         if (ds[b - 1].getMau() > 0) {
             ds[b - 1].TanCongMucTieu(ds[a - 1], t);
         }
