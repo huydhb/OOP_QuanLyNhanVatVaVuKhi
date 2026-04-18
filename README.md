@@ -152,4 +152,5 @@ Chương trình sử dụng:
 Lưu mã nguồn thành `main.cpp`, sau đó biên dịch:
 
 ```bash
-g++ -std=c++17 main.cpp -o app
+g++ main.cpp -o app && app.exe
+```

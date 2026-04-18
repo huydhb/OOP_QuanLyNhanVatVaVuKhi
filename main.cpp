@@ -56,6 +56,14 @@ void InLoi(const string& s) {
 }
 
 // ========================= LOP VUKHI =========================
+/**
+ * @class VuKhi
+ * @brief Lớp trừu tượng đại diện cho một loại vũ khí chung.
+ * 
+ * Đóng vai trò là lớp cơ sở (Base Class) cho các loại vũ khí cụ thể.
+ * Định nghĩa các thuộc tính cơ bản như tên, sát thương và tốc độ ra đòn,
+ * cùng với các phương thức ảo thuần túy (pure virtual) để đa hình hóa hành vi tấn công.
+ */
 class VuKhi {
 private:
     string tenVuKhi;
@@ -63,347 +71,282 @@ private:
     float tocDoRaDon;
 
 public:
-    string getTenVuKhi() const;
-    float getSatThuongCoBan() const;
-    float getTocDoRaDon() const;
+    // 1. get - set
+    string getTenVuKhi() const { return tenVuKhi; }
+    void setTenVuKhi(string _tenVuKhi) { tenVuKhi = _tenVuKhi; }
+    float getSatThuongCoBan() const { return satThuongCoBan; }
+    void setSatThuongCoBan(float _satThuongCoBan) { satThuongCoBan = _satThuongCoBan; }
+    float getTocDoRaDon() const { return tocDoRaDon; }
+    void setTocDoRaDon(float _tocDoRaDon) { tocDoRaDon = _tocDoRaDon; }
 
-    void setTenVuKhi(string _TenVuKhi);
-    void setSatThuongCoBan(float _SatThuongCoBan);
-    void setTocDoRaDon(float _TocDoRaDon);
+    // 2. constructor
+    VuKhi(string _tenVuKhi = "", float _satThuongCoBan = 0, float _tocDoRaDon = 1) {
+        tenVuKhi = _tenVuKhi;
+        satThuongCoBan = _satThuongCoBan;
+        tocDoRaDon = _tocDoRaDon;
+    }
+    VuKhi(const VuKhi &v) {
+        tenVuKhi = v.tenVuKhi;
+        satThuongCoBan = v.satThuongCoBan;
+        tocDoRaDon = v.tocDoRaDon;
+    } 
+    // 3. destructor
+    virtual ~VuKhi() {};
 
-    VuKhi();
-    VuKhi(string, float, float);
-    VuKhi(const VuKhi&);
-    virtual ~VuKhi();
-
+    // 4. virtual method
     virtual void TanCong() = 0;
     virtual float SatThuong(int t) = 0;
 };
 
-string VuKhi::getTenVuKhi() const {
-    return tenVuKhi;
-}
-
-float VuKhi::getSatThuongCoBan() const {
-    return satThuongCoBan;
-}
-
-float VuKhi::getTocDoRaDon() const {
-    return tocDoRaDon;
-}
-
-void VuKhi::setTenVuKhi(string _TenVuKhi) {
-    tenVuKhi = _TenVuKhi;
-}
-
-void VuKhi::setSatThuongCoBan(float _SatThuongCoBan) {
-    satThuongCoBan = (_SatThuongCoBan >= 0) ? _SatThuongCoBan : 0;
-}
-
-void VuKhi::setTocDoRaDon(float _TocDoRaDon) {
-    tocDoRaDon = (_TocDoRaDon > 0) ? _TocDoRaDon : 1;
-}
-
-VuKhi::VuKhi() : tenVuKhi(""), satThuongCoBan(0), tocDoRaDon(1) {}
-
-VuKhi::VuKhi(string tenVuKhi, float satThuongCoBan, float tocDoRaDon) {
-    setTenVuKhi(tenVuKhi);
-    setSatThuongCoBan(satThuongCoBan);
-    setTocDoRaDon(tocDoRaDon);
-}
-
-VuKhi::VuKhi(const VuKhi& other) {
-    tenVuKhi = other.tenVuKhi;
-    satThuongCoBan = other.satThuongCoBan;
-    tocDoRaDon = other.tocDoRaDon;
-}
-
-VuKhi::~VuKhi() {}
 
 // ========================= LOP KIEM =========================
+/**
+ * @class Kiem
+ * @brief Lớp đại diện cho vũ khí cận chiến (Kiếm).
+ * 
+ * Kế thừa từ VuKhi, bổ sung thêm cơ chế độ bền (doBen).
+ * Tổng sát thương gây ra bị giới hạn bởi độ bền hiện tại của kiếm.
+ */
 class Kiem : public VuKhi {
 private:
     int doBen;
 
 public:
-    int getDoBen() const;
-    void setDoBen(int _DoBen);
+    // 1. get - set
+    int getDoBen() const { return doBen; }
+    void setDoBen(int _doBen) { doBen = _doBen; }
 
-    Kiem();
-    Kiem(int, string, float, float);
-    Kiem(const Kiem&);
+    // 2. constructor
+    Kiem(int _doBen = 0, string _tenVuKhi = "", float _satThuongCoBan = 0, float _tocDoRaDon = 1) 
+        : VuKhi(_tenVuKhi, _satThuongCoBan, _tocDoRaDon) {
+        doBen = _doBen;
+    }
+    Kiem(const Kiem &k) : VuKhi(k) {
+        doBen = k.doBen;
+    }
+    ~Kiem() {};
+    
+    // 3. in - out
+    friend istream& operator>>(istream& in, Kiem& k) {
+        string ten;
+        float stcb, tdrd;
+        int db;
 
-    friend istream& operator>>(istream& in, Kiem& k);
-    friend ostream& operator<<(ostream& out, const Kiem& k);
+        cout << "Nhap ten kiem: ";
+        getline(in >> ws, ten);
+        cout << "Nhap sat thuong co ban: ";
+        in >> stcb;
+        cout << "Nhap toc do ra don: ";
+        in >> tdrd;
+        cout << "Nhap do ben: ";
+        in >> db;
 
-    void TanCong() override;
-    float SatThuong(int t) override;
+        k.setTenVuKhi(ten);
+        k.setSatThuongCoBan(stcb);
+        k.setTocDoRaDon(tdrd);
+        k.setDoBen(db);
+        return in;
+    }
+
+    friend ostream& operator<<(ostream& out, const Kiem& k) {
+        out << left
+            << setw(18) << "Loai vu khi:" << "Kiem\n"
+            << setw(18) << "Ten vu khi:" << k.getTenVuKhi() << '\n'
+            << setw(18) << "ST co ban:" << fixed << setprecision(2) << k.getSatThuongCoBan() << '\n'
+            << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << k.getTocDoRaDon() << '\n'
+            << setw(18) << "Do ben:" << k.doBen;
+        return out;
+    }
+
+    // 4. virtual method
+    void TanCong() override {
+        cout << "[Kiem] Thuc hien mot chuoi chem bang kiem.\n";
+    }
+
+    float SatThuong(int t) override {
+        if (getTocDoRaDon() <= 0 || t <= 0 || doBen <= 0) return 0;
+
+        int soLanChemTheoThoiGian = static_cast<int>(floor(t / getTocDoRaDon()));
+        int soLanChem = min(doBen, soLanChemTheoThoiGian);
+        float satThuong = soLanChem * getSatThuongCoBan();
+        doBen -= soLanChem;
+        return satThuong;
+    }
 };
 
-int Kiem::getDoBen() const {
-    return doBen;
-}
-
-void Kiem::setDoBen(int _DoBen) {
-    doBen = (_DoBen >= 0) ? _DoBen : 0;
-}
-
-Kiem::Kiem() : VuKhi(), doBen(0) {}
-
-Kiem::Kiem(int doBen, string tenVuKhi, float satThuongCoBan, float tocDoRaDon)
-    : VuKhi(tenVuKhi, satThuongCoBan, tocDoRaDon) {
-    setDoBen(doBen);
-}
-
-Kiem::Kiem(const Kiem& other) : VuKhi(other), doBen(other.doBen) {}
-
-istream& operator>>(istream& in, Kiem& k) {
-    string ten;
-    float stcb, tdrd;
-    int db;
-
-    cout << "Nhap ten kiem: ";
-    getline(in >> ws, ten);
-    cout << "Nhap sat thuong co ban: ";
-    in >> stcb;
-    cout << "Nhap toc do ra don: ";
-    in >> tdrd;
-    cout << "Nhap do ben: ";
-    in >> db;
-
-    k.setTenVuKhi(ten);
-    k.setSatThuongCoBan(stcb);
-    k.setTocDoRaDon(tdrd);
-    k.setDoBen(db);
-    return in;
-}
-
-ostream& operator<<(ostream& out, const Kiem& k) {
-    out << left
-        << setw(18) << "Loai vu khi:" << "Kiem\n"
-        << setw(18) << "Ten vu khi:" << k.getTenVuKhi() << '\n'
-        << setw(18) << "ST co ban:" << fixed << setprecision(2) << k.getSatThuongCoBan() << '\n'
-        << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << k.getTocDoRaDon() << '\n'
-        << setw(18) << "Do ben:" << k.doBen;
-    return out;
-}
-
-void Kiem::TanCong() {
-    cout << "[Kiem] Thuc hien mot chuoi chem bang kiem.\n";
-}
-
-float Kiem::SatThuong(int t) {
-    if (getTocDoRaDon() <= 0 || t <= 0 || doBen <= 0) return 0;
-
-    int soLanChemTheoThoiGian = static_cast<int>(floor(t / getTocDoRaDon()));
-    int soLanChem = min(doBen, soLanChemTheoThoiGian);
-    float satThuong = soLanChem * getSatThuongCoBan();
-    doBen -= soLanChem;
-    return satThuong;
-}
 
 // ========================= LOP SUNG =========================
+/**
+ * @class Sung
+ * @brief Lớp đại diện cho vũ khí tầm xa (Súng).
+ * 
+ * Kế thừa từ VuKhi, mô phỏng cơ chế xả đạn thực tế bao gồm 
+ * sức chứa hộp đạn (soLuongDanTrongOng) và thời gian nạp đạn (tocDoThayBang).
+ */
 class Sung : public VuKhi {
 private:
     int soLuongDanTrongOng;
     float tocDoThayBang;
 
 public:
-    int getSoLuongDanTrongOng() const;
-    float getTocDoThayBang() const;
-    void setSoLuongDanTrongOng(int _SoLuongDanTrongOng);
-    void setTocDoThayBang(float _TocDoThayBang);
+    // 1. get - set
+    int getSoLuongDanTrongOng() const { return soLuongDanTrongOng; }
+    void setSoLuongDanTrongOng(int _soLuongDanTrongOng) { soLuongDanTrongOng = _soLuongDanTrongOng; }
+    float getTocDoThayBang() const { return tocDoThayBang; }
+    void setTocDoThayBang(float _tocDoThayBang) { tocDoThayBang = _tocDoThayBang; }
 
-    Sung();
-    Sung(int, float, string, float, float);
-    Sung(const Sung&);
+    // 2. constructor
+    Sung(int _soLuongDanTrongOng = 0, float _tocDoThayBang = 0, string _tenVuKhi = "", float _satThuongCoBan = 0, float _tocDoRaDon = 1) 
+        : VuKhi(_tenVuKhi, _satThuongCoBan, _tocDoRaDon) {
+        soLuongDanTrongOng = _soLuongDanTrongOng;
+        tocDoThayBang = _tocDoThayBang;
+    }
+    Sung(const Sung &s) : VuKhi(s) {
+        soLuongDanTrongOng = s.soLuongDanTrongOng;
+        tocDoThayBang = s.tocDoThayBang;
+    }
+    ~Sung() {};
+    
+    //3. in - out
+    friend istream& operator>>(istream& in, Sung& s) {
+        string ten;
+        float stcb, tdrd, tdthay;
+        int slDan;
 
-    friend istream& operator>>(istream& in, Sung& s);
-    friend ostream& operator<<(ostream& out, const Sung& s);
+        cout << "Nhap ten sung: ";
+        getline(in >> ws, ten);
+        cout << "Nhap sat thuong co ban: ";
+        in >> stcb;
+        cout << "Nhap toc do ra don: ";
+        in >> tdrd;
+        cout << "Nhap so luong dan trong ong: ";
+        in >> slDan;
+        cout << "Nhap toc do thay bang: ";
+        in >> tdthay;
 
-    void TanCong() override;
-    float SatThuong(int t) override;
+        s.setTenVuKhi(ten);
+        s.setSatThuongCoBan(stcb);
+        s.setTocDoRaDon(tdrd);
+        s.setSoLuongDanTrongOng(slDan);
+        s.setTocDoThayBang(tdthay);
+        return in;
+    }
+
+    friend ostream& operator<<(ostream& out, const Sung& s) {
+        out << left
+            << setw(22) << "Loai vu khi:" << "Sung\n"
+            << setw(22) << "Ten vu khi:" << s.getTenVuKhi() << '\n'
+            << setw(22) << "ST co ban:" << fixed << setprecision(2) << s.getSatThuongCoBan() << '\n'
+            << setw(22) << "Toc do ra don:" << fixed << setprecision(2) << s.getTocDoRaDon() << '\n'
+            << setw(22) << "Dan trong ong:" << s.soLuongDanTrongOng << '\n'
+            << setw(22) << "Toc do thay bang:" << fixed << setprecision(2) << s.tocDoThayBang;
+        return out;
+    }
+
+    //4. virtual method
+    void TanCong() override {
+        cout << "[Sung] Nha dan vao muc tieu.\n";
+    }
+
+    float SatThuong(int t) override {
+        if (getTocDoRaDon() <= 0 || t <= 0 || soLuongDanTrongOng <= 0) return 0;
+
+        float thoiGianBanHet1Bang = soLuongDanTrongOng * getTocDoRaDon();
+        float chuKy = thoiGianBanHet1Bang + tocDoThayBang;
+        if (chuKy <= 0) return 0;
+
+        int soChuKy = static_cast<int>(floor(t / chuKy));
+        float thoiGianDu = t - soChuKy * chuKy;
+        int soVienBanThem = min(soLuongDanTrongOng,
+                                static_cast<int>(floor(thoiGianDu / getTocDoRaDon())));
+        int tongDan = soChuKy * soLuongDanTrongOng + soVienBanThem;
+        return tongDan * getSatThuongCoBan();
+    }
 };
 
-int Sung::getSoLuongDanTrongOng() const {
-    return soLuongDanTrongOng;
-}
 
-float Sung::getTocDoThayBang() const {
-    return tocDoThayBang;
-}
-
-void Sung::setSoLuongDanTrongOng(int _SoLuongDanTrongOng) {
-    soLuongDanTrongOng = (_SoLuongDanTrongOng >= 0) ? _SoLuongDanTrongOng : 0;
-}
-
-void Sung::setTocDoThayBang(float _TocDoThayBang) {
-    tocDoThayBang = (_TocDoThayBang >= 0) ? _TocDoThayBang : 0;
-}
-
-Sung::Sung() : VuKhi(), soLuongDanTrongOng(0), tocDoThayBang(0) {}
-
-Sung::Sung(int soLuongDanTrongOng, float tocDoThayBang, string tenVuKhi, float satThuongCoBan, float tocDoRaDon)
-    : VuKhi(tenVuKhi, satThuongCoBan, tocDoRaDon) {
-    setSoLuongDanTrongOng(soLuongDanTrongOng);
-    setTocDoThayBang(tocDoThayBang);
-}
-
-Sung::Sung(const Sung& other)
-    : VuKhi(other), soLuongDanTrongOng(other.soLuongDanTrongOng), tocDoThayBang(other.tocDoThayBang) {}
-
-istream& operator>>(istream& in, Sung& s) {
-    string ten;
-    float stcb, tdrd, tdthay;
-    int slDan;
-
-    cout << "Nhap ten sung: ";
-    getline(in >> ws, ten);
-    cout << "Nhap sat thuong co ban: ";
-    in >> stcb;
-    cout << "Nhap toc do ra don: ";
-    in >> tdrd;
-    cout << "Nhap so luong dan trong ong: ";
-    in >> slDan;
-    cout << "Nhap toc do thay bang: ";
-    in >> tdthay;
-
-    s.setTenVuKhi(ten);
-    s.setSatThuongCoBan(stcb);
-    s.setTocDoRaDon(tdrd);
-    s.setSoLuongDanTrongOng(slDan);
-    s.setTocDoThayBang(tdthay);
-    return in;
-}
-
-ostream& operator<<(ostream& out, const Sung& s) {
-    out << left
-        << setw(22) << "Loai vu khi:" << "Sung\n"
-        << setw(22) << "Ten vu khi:" << s.getTenVuKhi() << '\n'
-        << setw(22) << "ST co ban:" << fixed << setprecision(2) << s.getSatThuongCoBan() << '\n'
-        << setw(22) << "Toc do ra don:" << fixed << setprecision(2) << s.getTocDoRaDon() << '\n'
-        << setw(22) << "Dan trong ong:" << s.soLuongDanTrongOng << '\n'
-        << setw(22) << "Toc do thay bang:" << fixed << setprecision(2) << s.tocDoThayBang;
-    return out;
-}
-
-void Sung::TanCong() {
-    cout << "[Sung] Nha dan vao muc tieu.\n";
-}
-
-float Sung::SatThuong(int t) {
-    if (getTocDoRaDon() <= 0 || t <= 0 || soLuongDanTrongOng <= 0) return 0;
-
-    float thoiGianBanHet1Bang = soLuongDanTrongOng * getTocDoRaDon();
-    float chuKy = thoiGianBanHet1Bang + tocDoThayBang;
-    if (chuKy <= 0) return 0;
-
-    int soChuKy = static_cast<int>(floor(t / chuKy));
-    float thoiGianDu = t - soChuKy * chuKy;
-    int soVienBanThem = min(soLuongDanTrongOng,
-                            static_cast<int>(floor(thoiGianDu / getTocDoRaDon())));
-    int tongDan = soChuKy * soLuongDanTrongOng + soVienBanThem;
-    return tongDan * getSatThuongCoBan();
-}
 
 // ========================= LOP PHEPTHUAT =========================
+/**
+ * @class PhepThuat
+ * @brief Lớp đại diện cho vũ khí ma thuật.
+ * 
+ * Kế thừa từ VuKhi. Sức mạnh phép thuật không bị giới hạn bởi đạn hay độ bền,
+ * nhưng bù lại sẽ tiêu hao năng lượng (Mana) của nhân vật mỗi lần thi triển.
+ */
 class PhepThuat : public VuKhi {
 private:
     string loaiPhep;
     int nangLuongTieuHao;
 
 public:
-    string getLoaiPhep() const;
-    int getNangLuongTieuHao() const;
-    void setLoaiPhep(string _LoaiPhep);
-    void setNangLuongTieuHao(int _NangLuongTieuHao);
+    // 1. get - set
+    string getLoaiPhep() const { return loaiPhep; }
+    void setLoaiPhep(string _loaiPhep) { loaiPhep = _loaiPhep; }
+    int getNangLuongTieuHao() const { return nangLuongTieuHao; }
+    void setNangLuongTieuHao(int _nangLuongTieuHao) { nangLuongTieuHao = _nangLuongTieuHao; }
+    
+    // 2. constructor
+    PhepThuat(string _loaiPhep = "", int _nangLuongTieuHao = 0, string _tenVuKhi = "", float _satThuongCoBan = 0, float _tocDoRaDon = 1) 
+        : VuKhi(_tenVuKhi, _satThuongCoBan, _tocDoRaDon) {
+        loaiPhep = _loaiPhep;
+        nangLuongTieuHao = _nangLuongTieuHao;
+    }
+    PhepThuat(const PhepThuat &p) : VuKhi(p) {
+        loaiPhep = p.loaiPhep;
+        nangLuongTieuHao = p.nangLuongTieuHao;
+    }
+    ~PhepThuat() {};
 
-    PhepThuat();
-    PhepThuat(string, int, string, float, float);
-    PhepThuat(const PhepThuat&);
-    ~PhepThuat();
+    //3. in - out   
+    friend istream& operator>>(istream& in, PhepThuat& p) {
+        string ten, loai;
+        float stcb, tdrd;
+        int nlth;
 
-    friend istream& operator>>(istream& in, PhepThuat& p);
-    friend ostream& operator<<(ostream& out, const PhepThuat& p);
+        cout << "Nhap ten phep thuat: ";
+        getline(in >> ws, ten);
+        cout << "Nhap sat thuong co ban: ";
+        in >> stcb;
+        cout << "Nhap toc do ra don: ";
+        in >> tdrd;
+        cout << "Nhap loai phep: ";
+        getline(in >> ws, loai);
+        cout << "Nhap nang luong tieu hao moi lan: ";
+        in >> nlth;
 
-    void TanCong() override;
-    float SatThuong(int t) override;
+        p.setTenVuKhi(ten);
+        p.setSatThuongCoBan(stcb);
+        p.setTocDoRaDon(tdrd);
+        p.setLoaiPhep(loai);
+        p.setNangLuongTieuHao(nlth);
+        return in;
+    }
+
+    friend ostream& operator<<(ostream& out, const PhepThuat& p) {
+        out << left
+            << setw(24) << "Loai vu khi:" << "PhepThuat\n"
+            << setw(24) << "Ten vu khi:" << p.getTenVuKhi() << '\n'
+            << setw(24) << "ST co ban:" << fixed << setprecision(2) << p.getSatThuongCoBan() << '\n'
+            << setw(24) << "Toc do ra don:" << fixed << setprecision(2) << p.getTocDoRaDon() << '\n'
+            << setw(24) << "Loai phep:" << p.loaiPhep << '\n'
+            << setw(24) << "NL tieu hao:" << p.nangLuongTieuHao;
+        return out;
+    }
+
+    // 4. virtual method
+    void TanCong() override {
+        cout << "[PhepThuat] Tung ra mot loat phep thuat.\n";
+    }
+
+    float SatThuong(int t) override {
+        if (getTocDoRaDon() <= 0 || t <= 0) return 0;
+
+        int soLanRaPhepTheoThoiGian = static_cast<int>(floor(t / getTocDoRaDon()));
+        return soLanRaPhepTheoThoiGian * getSatThuongCoBan();
+    }
 };
 
-string PhepThuat::getLoaiPhep() const {
-    return loaiPhep;
-}
-
-int PhepThuat::getNangLuongTieuHao() const {
-    return nangLuongTieuHao;
-}
-
-void PhepThuat::setLoaiPhep(string _LoaiPhep) {
-    loaiPhep = _LoaiPhep;
-}
-
-void PhepThuat::setNangLuongTieuHao(int _NangLuongTieuHao) {
-    nangLuongTieuHao = (_NangLuongTieuHao >= 0) ? _NangLuongTieuHao : 0;
-}
-
-PhepThuat::PhepThuat() : VuKhi(), loaiPhep(""), nangLuongTieuHao(0) {}
-
-PhepThuat::PhepThuat(string loaiPhep, int nangLuongTieuHao, string tenVuKhi, float satThuongCoBan, float tocDoRaDon)
-    : VuKhi(tenVuKhi, satThuongCoBan, tocDoRaDon) {
-    setLoaiPhep(loaiPhep);
-    setNangLuongTieuHao(nangLuongTieuHao);
-}
-
-PhepThuat::PhepThuat(const PhepThuat& other)
-    : VuKhi(other), loaiPhep(other.loaiPhep), nangLuongTieuHao(other.nangLuongTieuHao) {}
-
-PhepThuat::~PhepThuat() {}
-
-istream& operator>>(istream& in, PhepThuat& p) {
-    string ten, loai;
-    float stcb, tdrd;
-    int nlth;
-
-    cout << "Nhap ten phep thuat: ";
-    getline(in >> ws, ten);
-    cout << "Nhap sat thuong co ban: ";
-    in >> stcb;
-    cout << "Nhap toc do ra don: ";
-    in >> tdrd;
-    cout << "Nhap loai phep: ";
-    getline(in >> ws, loai);
-    cout << "Nhap nang luong tieu hao moi lan: ";
-    in >> nlth;
-
-    p.setTenVuKhi(ten);
-    p.setSatThuongCoBan(stcb);
-    p.setTocDoRaDon(tdrd);
-    p.setLoaiPhep(loai);
-    p.setNangLuongTieuHao(nlth);
-    return in;
-}
-
-ostream& operator<<(ostream& out, const PhepThuat& p) {
-    out << left
-        << setw(24) << "Loai vu khi:" << "PhepThuat\n"
-        << setw(24) << "Ten vu khi:" << p.getTenVuKhi() << '\n'
-        << setw(24) << "ST co ban:" << fixed << setprecision(2) << p.getSatThuongCoBan() << '\n'
-        << setw(24) << "Toc do ra don:" << fixed << setprecision(2) << p.getTocDoRaDon() << '\n'
-        << setw(24) << "Loai phep:" << p.loaiPhep << '\n'
-        << setw(24) << "NL tieu hao:" << p.nangLuongTieuHao;
-    return out;
-}
-
-void PhepThuat::TanCong() {
-    cout << "[PhepThuat] Tung ra mot loat phep thuat.\n";
-}
-
-float PhepThuat::SatThuong(int t) {
-    if (getTocDoRaDon() <= 0 || t <= 0) return 0;
-
-    int soLanRaPhepTheoThoiGian = static_cast<int>(floor(t / getTocDoRaDon()));
-    return soLanRaPhepTheoThoiGian * getSatThuongCoBan();
-}
 
 // ========================= CAC HAM KHOI TAO, HIEN THI VA TRANG BI VU KHI =========================
 void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
@@ -493,7 +436,7 @@ VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
 
     ds.push_back(vk);
     InThongBao("Da them vu khi thanh cong.");
-    return vk; // tra ve con tro trong kho
+    return vk; 
 }
 
 void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
@@ -574,6 +517,16 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
     }
 } 
 
+/**
+ * @brief Tạo bản sao của một vũ khí dựa trên kiểu động thực tế.
+ *
+ * Hàm dùng dynamic_cast để xác định loại vũ khí gốc và tạo ra bản sao tương ứng.
+ * Thiết kế này giúp mỗi nhân vật sở hữu một vũ khí riêng, tránh dùng chung
+ * trực tiếp object trong kho.
+ *
+ * @param src Con trỏ tới vũ khí nguồn.
+ * @return Con trỏ tới bản sao mới tạo; trả về nullptr nếu src rỗng hoặc kiểu không hỗ trợ.
+ */
 VuKhi* SaoChepVuKhi(const VuKhi* src) {
     if (src == nullptr) return nullptr;
 
@@ -623,6 +576,13 @@ VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
 }
 
 // ========================= LOP NHANVAT =========================
+/**
+ * @class NhanVat
+ * @brief Lớp đại diện cho một thực thể nhân vật trong trò chơi.
+ * 
+ * Quản lý trạng thái sinh tồn (máu), khả năng thi triển kỹ năng (năng lượng)
+ * và quản lý vòng đời của vũ khí đang trang bị. Bao gồm các logic chiến đấu với mục tiêu.
+ */
 class NhanVat {
 private:
     string tenNhanVat;
@@ -631,84 +591,59 @@ private:
     VuKhi* vk;
 
 public:
-    string getTenNhanVat() const;
-    float getMau() const;
-    int getNangLuong() const;
-    VuKhi* getVuKhi() const;
-
-    void setTenNhanVat(string _tenNhanVat);
-    void setMau(float _mau);
-    void setNangLuong(int _nangLuong);
-    void setVuKhi(VuKhi* _vk);
-
-    NhanVat();
-    NhanVat(string, float, int, VuKhi*);
-    NhanVat(const NhanVat&);
-    ~NhanVat();
-
-    friend istream& operator>>(istream& in, NhanVat& nv);
-    friend ostream& operator<<(ostream& out, const NhanVat& nv);
-
-    void TrangBi(VuKhi* v);
-    void NhanSatThuong(float st);
-    void TanCongMucTieu(NhanVat& b, int t);
-};
-
-
-string NhanVat::getTenNhanVat() const {
-    return tenNhanVat;
-}
-
-float NhanVat::getMau() const {
-    return mau;
-}
-
-int NhanVat::getNangLuong() const {
-    return nangLuong;
-}
-
-VuKhi* NhanVat::getVuKhi() const {
-    return vk;
-}
-
-void NhanVat::setTenNhanVat(string _tenNhanVat) {
-    tenNhanVat = _tenNhanVat;
-}
-
-void NhanVat::setMau(float _mau) {
-    mau = (_mau >= 0) ? _mau : 0;
-}
-
-void NhanVat::setNangLuong(int _nangLuong) {
-    nangLuong = (_nangLuong >= 0) ? _nangLuong : 0;
-}
-
-void NhanVat::setVuKhi(VuKhi* _vk) {
-    if (vk != _vk) {
-        delete vk;
-        vk = _vk;
+    //1. get - set
+    string getTenNhanVat() const {
+        return tenNhanVat;
     }
-}
+    float getMau() const {
+        return mau;
+    }
+    int getNangLuong() const {
+        return nangLuong;
+    }
+    VuKhi* getVuKhi() const {
+        return vk;
+    }
+    
 
-NhanVat::NhanVat() : tenNhanVat(""), mau(0), nangLuong(0), vk(nullptr) {}
+    void setTenNhanVat(string _tenNhanVat) {
+        tenNhanVat = _tenNhanVat;
+    }
+    
+    void setMau(float _mau) {
+        mau = (_mau >= 0) ? _mau : 0;
+    }
 
-NhanVat::NhanVat(string tenNhanVat, float mau, int nangLuong, VuKhi* vk)
-    : tenNhanVat(tenNhanVat), mau((mau >= 0) ? mau : 0), nangLuong((nangLuong >= 0) ? nangLuong : 0), vk(vk) {}
+    void setNangLuong(int _nangLuong) {
+        nangLuong = (_nangLuong >= 0) ? _nangLuong : 0;
+    }
 
-NhanVat::NhanVat(const NhanVat& other)
-    : tenNhanVat(other.tenNhanVat), mau(other.mau), nangLuong(other.nangLuong), vk(SaoChepVuKhi(other.vk)) {}
+    void setVuKhi(VuKhi* _vk) {
+        if (vk != _vk) {
+            delete vk;
+            vk = _vk;
+        }
+    }
 
-NhanVat::~NhanVat() {
-    delete vk;
-    vk = nullptr;
-}
+    //2. constructor
+    NhanVat() : tenNhanVat(""), mau(0), nangLuong(0), vk(nullptr) {}
 
-istream& operator>>(istream& in, NhanVat& nv) {
+    NhanVat(string tenNhanVat, float mau, int nangLuong, VuKhi* vk)
+        : tenNhanVat(tenNhanVat), mau((mau >= 0) ? mau : 0), nangLuong((nangLuong >= 0) ? nangLuong : 0), vk(vk) {}
+
+    NhanVat(const NhanVat& other)
+        : tenNhanVat(other.tenNhanVat), mau(other.mau), nangLuong(other.nangLuong), vk(SaoChepVuKhi(other.vk)) {}
+
+    ~NhanVat() {
+        delete vk;
+        vk = nullptr;
+    }
+    
+    //3. in - out
+    friend istream& operator>>(istream& in, NhanVat& nv) {
     string ten;
     float mau;
     int nangLuong;
-    int luaChon;
-
     cout << "Nhap ten nhan vat: ";
     getline(in >> ws, ten);
     cout << "Nhap mau: ";
@@ -719,11 +654,14 @@ istream& operator>>(istream& in, NhanVat& nv) {
     nv.setTenNhanVat(ten);
     nv.setMau(mau);
     nv.setNangLuong(nangLuong);
+<<<<<<< HEAD
     nv.setVuKhi(nullptr);
+=======
+>>>>>>> 093ef21 (refactor: inline class methods)
     return in;
-}
-
-ostream& operator<<(ostream& out, const NhanVat& nv) {
+    }
+    
+    friend ostream& operator<<(ostream& out, const NhanVat& nv) {
     out << left
         << setw(18) << "Ten nhan vat:" << nv.tenNhanVat << '\n'
         << setw(18) << "Mau:" << fixed << setprecision(2) << nv.mau << '\n'
@@ -746,23 +684,34 @@ ostream& operator<<(ostream& out, const NhanVat& nv) {
     }
     return out;
 }
-
-void NhanVat::TrangBi(VuKhi* v) {
-    setVuKhi(v);
-}
-
-void NhanVat::NhanSatThuong(float st) {
-    if (st < 0) st = 0;
-    mau -= st;
-    if (mau < 0) {
-        mau = 0;
+    //4. extend method
+    void TrangBi(VuKhi* v) {
+        setVuKhi(v);
     }
-}
 
-void NhanVat::TanCongMucTieu(NhanVat& b, int t) {
-    if (vk == nullptr) {
-        cout << tenNhanVat << " chua co vu khi de tan cong.\n";
-        return;
+    void NhanSatThuong(float st) {
+        if (st < 0) st = 0;
+        mau -= st;
+        if (mau < 0) {
+            mau = 0;
+        }
+    }
+
+    /**
+     * @brief Thực hiện chuỗi hành động tấn công lên một mục tiêu trong một khoảng thời gian.
+     * 
+     * Hàm này xử lý các ràng buộc phức tạp như: 
+     * 1. Nguồn sát thương (phải có vũ khí).
+     * 2. Trạng thái bản thân (phải còn sống).
+     * 3. Cơ chế năng lượng (nếu dùng phép thuật thì phải đủ năng lượng hao phí).
+     * 
+     * @param b Tham chiếu đến nhân vật mục tiêu bị tấn công.
+     * @param t Khung thời gian thực hiện chuỗi hành động tấn công (tính bằng giây).
+     */
+    void TanCongMucTieu(NhanVat& b, int t) {
+        if (vk == nullptr) {
+            cout << tenNhanVat << " chua co vu khi de tan cong.\n";
+            return;
     }
     if (mau <= 0) {
         cout << tenNhanVat << " da bi ha guc nen khong the tan cong.\n";
@@ -776,9 +725,7 @@ void NhanVat::TanCongMucTieu(NhanVat& b, int t) {
         cout << "Thoi gian tan cong phai > 0.\n";
         return;
     }
-
     float satThuong = 0;
-
     // Xu ly rieng cho PhepThuat vi cong thuc UML can nang luong cua NhanVat
     if (PhepThuat* p = dynamic_cast<PhepThuat*>(vk)) {
         if (p->getTocDoRaDon() > 0 && p->getNangLuongTieuHao() > 0) {
@@ -794,13 +741,12 @@ void NhanVat::TanCongMucTieu(NhanVat& b, int t) {
     } else {
         satThuong = vk->SatThuong(t);
     }
-
     vk->TanCong();
     b.NhanSatThuong(satThuong);
+    cout << tenNhanVat << " gay ra " << fixed << setprecision(2) << satThuong << " sat thuong len " << b.tenNhanVat << ".\n";
+    }
+};
 
-    cout << tenNhanVat << " gay ra " << fixed << setprecision(2) << satThuong
-         << " sat thuong len " << b.tenNhanVat << ".\n";
-}
 
 // ========================= CAC HAM MENU =========================
 void LamMoiManHinh() {
@@ -877,11 +823,11 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
     cin >> opt;
     switch (opt) {
         case 1:
-            moi = ChonVuKhiTuDanhSach(dsVK); // ban sao
+            moi = ChonVuKhiTuDanhSach(dsVK); 
             break;
         case 2: {
-            VuKhi* vkKho = ThemVuKhi(dsVK);  // them vao kho
-            moi = SaoChepVuKhi(vkKho);       // nhan vat giu ban sao
+            VuKhi* vkKho = ThemVuKhi(dsVK);  
+            moi = SaoChepVuKhi(vkKho);      
             break;
         }
         default:
