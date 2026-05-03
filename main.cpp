@@ -13,6 +13,7 @@
 
 using namespace std;
 // ========================= TIEN ICH HIEN THI =========================
+/// @brief Enum định nghĩa các mã màu chữ cho Windows Console.
 enum MauChu {
     MAU_CYAN = 3,
     MAU_MAC_DINH = 7,
@@ -24,14 +25,17 @@ enum MauChu {
     MAU_TRANG_SANG = 15
 };
 
+/// @brief Đặt màu chữ cho Windows Console.
 void setColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
+/// @brief Khôi phục màu chữ mặc định.
 void resetColor() {
     setColor(MAU_MAC_DINH);
 }
 
+/// @brief In tiêu đề có viền, căn giữa và tô màu.
 void TieuDe(const string& s, int color = MAU_XANH_DUONG) {
     setColor(color);
     cout << "\n============================================================\n";
@@ -45,22 +49,45 @@ void TieuDe(const string& s, int color = MAU_XANH_DUONG) {
     resetColor();
 }
 
+/// @brief In thông báo thành công (màu xanh lá).
 void InThongBao(const string& s) {
     setColor(MAU_XANH_LA);
     cout << s << '\n';
     resetColor();
 }
 
+/// @brief In cảnh báo (màu vàng).
 void InCanhBao(const string& s) {
     setColor(MAU_VANG);
     cout << s << '\n';
     resetColor();
 }
 
+/// @brief In thông báo lỗi (màu đỏ).
 void InLoi(const string& s) {
     setColor(MAU_DO);
     cout << s << '\n';
     resetColor();
+}
+
+/**
+ * @brief Tính số byte thừa trong chuỗi UTF-8.
+ *
+ * Trong UTF-8, các byte continuation (byte nối) có dạng 10xxxxxx.
+ * Hàm đếm số byte đó để bù trừ khi dùng setw() căn cột,
+ * vì setw() tính theo byte chứ không theo số ký tự hiển thị.
+ *
+ * @param s Chuỗi UTF-8 cần tính.
+ * @return Số byte thừa (mỗi ký tự tiếng Việt có dấu thường thừa 2 byte).
+ */
+int tinhByteThua(const string& s) {
+    int extra = 0;
+    for (size_t i = 0; i < s.length(); ++i) {
+        if ((s[i] & 0xC0) == 0x80) {
+            extra++;
+        }
+    }
+    return extra;
 }
 
 // ========================= LOP VUKHI =========================
@@ -140,13 +167,13 @@ public:
         float stcb, tdrd;
         int db;
 
-        cout << "Nhap ten kiem: ";
+        cout << "Nhập tên kiếm: ";
         getline(in >> ws, ten);
-        cout << "Nhap sat thuong co ban: ";
+        cout << "Nhập sát thương cơ bản: ";
         in >> stcb;
-        cout << "Nhap toc do ra don: ";
+        cout << "Nhập tốc độ ra đòn (giây/lần): ";
         in >> tdrd;
-        cout << "Nhap do ben: ";
+        cout << "Nhập độ bền (số lần chém tối đa): ";
         in >> db;
 
         k.setTenVuKhi(ten);
@@ -158,15 +185,15 @@ public:
 
     friend ostream& operator<<(ostream& out, Kiem k) {
         setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
-        resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Kiem";
+        resetColor(); out << left << setw(22 + tinhByteThua("Loại vũ khí:")) << "Loại vũ khí:" << setw(16 + tinhByteThua("Kiếm")) << "Kiếm";
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Ten vu khi:" << setw(20) << k.getTenVuKhi();
+        resetColor(); out << setw(22 + tinhByteThua("Tên vũ khí:")) << "Tên vũ khí:" << setw(16 + tinhByteThua(k.getTenVuKhi())) << k.getTenVuKhi();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "ST co ban:" << fixed << setprecision(2) << setw(20) << k.getSatThuongCoBan();
+        resetColor(); out << setw(22 + tinhByteThua("Sát thương cơ bản:")) << "Sát thương cơ bản:" << fixed << setprecision(2) << setw(16) << k.getSatThuongCoBan();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << setw(20) << k.getTocDoRaDon();
+        resetColor(); out << setw(22 + tinhByteThua("Tốc độ ra đòn:")) << "Tốc độ ra đòn:" << fixed << setprecision(2) << setw(16) << k.getTocDoRaDon();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Do ben:" << setw(20) << k.doBen;
+        resetColor(); out << setw(22 + tinhByteThua("Độ bền:")) << "Độ bền:" << setw(16) << k.getDoBen();
         setColor(MAU_CYAN); out << "|\n  +---------------------------------------+";
         resetColor();
         return out;
@@ -175,7 +202,7 @@ public:
     // 4. virtual method
     void TanCong() override {
         setColor(MAU_XANH_LA);
-        cout << "  [Kiem] Thuc hien mot chuoi chem lien hoan.\n";
+        cout << "  [Kiếm] Thực hiện một chuỗi chém liên hoàn.\n";
         resetColor();
     }
 
@@ -207,9 +234,9 @@ public:
  */
 class Sung : public VuKhi {
 private:
-    int soLuongDanToiDa;    // Dung tich bang (khong doi)
-    int soLuongDanTrongOng; // Dan hien tai trong bang (trang thai)
-    float tocDoThayBang;    // Giay de nap 1 bang day
+    int soLuongDanToiDa;    // Dung tích băng (không đổi)
+    int soLuongDanTrongOng; // Đạn hiện tại trong băng (trạng thái thay đổi)
+    float tocDoThayBang;    // Giây để nạp 1 băng đầy
 
 public:
     // 1. get - set
@@ -225,7 +252,7 @@ public:
          string _tenVuKhi = "", float _satThuongCoBan = 0, float _tocDoRaDon = 1)
         : VuKhi(_tenVuKhi, _satThuongCoBan, _tocDoRaDon) {
         soLuongDanToiDa    = (_soLuongDanToiDa > 0) ? _soLuongDanToiDa : 1;
-        soLuongDanTrongOng = soLuongDanToiDa; // bat dau voi bang day
+        soLuongDanTrongOng = soLuongDanToiDa; // Bắt đầu với băng đạn đầy
         tocDoThayBang      = _tocDoThayBang;
     }
     Sung(const Sung &s) : VuKhi(s) {
@@ -241,22 +268,22 @@ public:
         float stcb, tdrd, tdthay;
         int slToiDa;
 
-        cout << "Nhap ten sung: ";
+        cout << "Nhập tên súng: ";
         getline(in >> ws, ten);
-        cout << "Nhap sat thuong co ban (1 vien): ";
+        cout << "Nhập sát thương cơ bản (1 viên): ";
         in >> stcb;
-        cout << "Nhap toc do ra don (giay/vien): ";
+        cout << "Nhập tốc độ ra đòn (giây/viên): ";
         in >> tdrd;
-        cout << "Nhap dung tich bang dan (so vien toi da): ";
+        cout << "Nhập dung tích băng đạn (số viên tối đa): ";
         in >> slToiDa;
-        cout << "Nhap toc do thay bang (giay): ";
+        cout << "Nhập tốc độ thay băng (giây): ";
         in >> tdthay;
 
         s.setTenVuKhi(ten);
         s.setSatThuongCoBan(stcb);
         s.setTocDoRaDon(tdrd);
         s.setSoLuongDanToiDa(slToiDa);
-        s.soLuongDanTrongOng = slToiDa; // nap day khi tao moi
+        s.soLuongDanTrongOng = slToiDa; // Nạp đầy băng đạn khi tạo mới
         s.setTocDoThayBang(tdthay);
         return in;
     }
@@ -264,17 +291,17 @@ public:
     friend ostream& operator<<(ostream& out, Sung s) {
         string danHienThi = to_string(s.soLuongDanTrongOng) + "/" + to_string(s.soLuongDanToiDa);
         setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
-        resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Sung";
+        resetColor(); out << left << setw(22 + tinhByteThua("Loại vũ khí:")) << "Loại vũ khí:" << setw(16 + tinhByteThua("Súng")) << "Súng";
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Ten vu khi:" << setw(20) << s.getTenVuKhi();
+        resetColor(); out << setw(22 + tinhByteThua("Tên vũ khí:")) << "Tên vũ khí:" << setw(16 + tinhByteThua(s.getTenVuKhi())) << s.getTenVuKhi();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "ST co ban:" << fixed << setprecision(2) << setw(20) << s.getSatThuongCoBan();
+        resetColor(); out << setw(22 + tinhByteThua("Sát thương cơ bản:")) << "Sát thương cơ bản:" << fixed << setprecision(2) << setw(16) << s.getSatThuongCoBan();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << setw(20) << s.getTocDoRaDon();
+        resetColor(); out << setw(22 + tinhByteThua("Tốc độ ra đòn:")) << "Tốc độ ra đòn:" << fixed << setprecision(2) << setw(16) << s.getTocDoRaDon();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Dan trong bang:" << setw(20) << danHienThi;
+        resetColor(); out << setw(22 + tinhByteThua("Đạn trong băng:")) << "Đạn trong băng:" << setw(16 + tinhByteThua(danHienThi)) << danHienThi;
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Toc do thay bang:" << fixed << setprecision(2) << setw(20) << s.tocDoThayBang;
+        resetColor(); out << setw(22 + tinhByteThua("Tốc độ thay băng:")) << "Tốc độ thay băng:" << fixed << setprecision(2) << setw(16) << s.tocDoThayBang;
         setColor(MAU_CYAN); out << "|\n  +---------------------------------------+";
         resetColor();
         return out;
@@ -283,7 +310,7 @@ public:
     //4. virtual method
     void TanCong() override {
         setColor(MAU_VANG);
-        cout << "  [Sung] Xa dan lien tuc vao muc tieu.\n";
+        cout << "  [Súng] Xả đạn liên tục vào mục tiêu.\n";
         resetColor();
     }
 
@@ -377,15 +404,15 @@ public:
         float stcb, tdrd;
         int nlth;
 
-        cout << "Nhap ten phep thuat: ";
+        cout << "Nhập tên phép thuật: ";
         getline(in >> ws, ten);
-        cout << "Nhap sat thuong co ban: ";
+        cout << "Nhập sát thương cơ bản: ";
         in >> stcb;
-        cout << "Nhap toc do ra don: ";
+        cout << "Nhập tốc độ ra đòn (giây/lần): ";
         in >> tdrd;
-        cout << "Nhap loai phep: ";
+        cout << "Nhập loại phép: ";
         getline(in >> ws, loai);
-        cout << "Nhap nang luong tieu hao moi lan: ";
+        cout << "Nhập năng lượng tiêu hao mỗi lần: ";
         in >> nlth;
 
         p.setTenVuKhi(ten);
@@ -398,17 +425,17 @@ public:
 
     friend ostream& operator<<(ostream& out, PhepThuat p) {
         setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
-        resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Phep Thuat";
+        resetColor(); out << left << setw(22 + tinhByteThua("Loại vũ khí:")) << "Loại vũ khí:" << setw(16 + tinhByteThua("Phép Thuật")) << "Phép Thuật";
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Ten vu khi:" << setw(20) << p.getTenVuKhi();
+        resetColor(); out << setw(22 + tinhByteThua("Tên vũ khí:")) << "Tên vũ khí:" << setw(16 + tinhByteThua(p.getTenVuKhi())) << p.getTenVuKhi();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "ST co ban:" << fixed << setprecision(2) << setw(20) << p.getSatThuongCoBan();
+        resetColor(); out << setw(22 + tinhByteThua("Sát thương cơ bản:")) << "Sát thương cơ bản:" << fixed << setprecision(2) << setw(16) << p.getSatThuongCoBan();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << setw(20) << p.getTocDoRaDon();
+        resetColor(); out << setw(22 + tinhByteThua("Tốc độ ra đòn:")) << "Tốc độ ra đòn:" << fixed << setprecision(2) << setw(16) << p.getTocDoRaDon();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Loai phep:" << setw(20) << p.loaiPhep;
+        resetColor(); out << setw(22 + tinhByteThua("Loại phép:")) << "Loại phép:" << setw(16 + tinhByteThua(p.loaiPhep)) << p.loaiPhep;
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "NL tieu hao:" << setw(20) << p.nangLuongTieuHao;
+        resetColor(); out << setw(22 + tinhByteThua("Năng lượng tiêu hao:")) << "Năng lượng tiêu hao:" << setw(16) << p.nangLuongTieuHao;
         setColor(MAU_CYAN); out << "|\n  +---------------------------------------+";
         resetColor();
         return out;
@@ -417,7 +444,7 @@ public:
     // 4. virtual method
     void TanCong() override {
         setColor(MAU_TIM);
-        cout << "  [Phep Thuat] Tung ra cac don ma thuat uy luc.\n";
+        cout << "  [Phép Thuật] Tung ra các đòn ma thuật uy lực.\n";
         resetColor();
     }
 
@@ -435,59 +462,64 @@ public:
  * @brief In toàn bộ vũ khí trong kho
  */
 
+/// @brief Xóa bộ đệm nhập (stdin) để tránh lỗi đọc dữ liệu thừa.
 void XoaBoDemNhap() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
+/// @brief Hiển thị toàn bộ danh sách vũ khí trong kho dưới dạng bảng.
 void HienThiDanhSachVK(const vector<VuKhi*>& ds) {
     if (ds.empty()) {
-        InCanhBao("Danh sach vu khi dang rong.");
+        InCanhBao("Danh sách vũ khí đang trống.");
         return;
     }
 
-    TieuDe("DANH SACH CAC LOAI VU KHI TRONG KHO", MAU_XANH_LA);
+    TieuDe("DANH SÁCH CÁC LOẠI VŨ KHÍ TRONG KHO", MAU_XANH_LA);
 
     setColor(MAU_DO);
-    cout << "+====+============+====================+===========+===============+\n";
+    cout << "+====+==============+====================+===========+===============+\n";
     cout << "|"; resetColor(); cout << left << setw(4) << "STT";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(12) << " Loai Vu Khi";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20) << " Ten Vu Khi";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(11) << " ST Co Ban";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(15) << " Toc Do Ra Don";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(14 + tinhByteThua(" Loại Vũ Khí")) << " Loại Vũ Khí";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20 + tinhByteThua(" Tên Vũ Khí")) << " Tên Vũ Khí";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(11 + tinhByteThua(" Sát Thương")) << " Sát Thương";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(15 + tinhByteThua(" Tốc Độ Ra Đòn")) << " Tốc Độ Ra Đòn";
     setColor(MAU_DO); cout << "|\n";
-    cout << "+====+============+====================+===========+===============+\n";
+    cout << "+====+==============+====================+===========+===============+\n";
     
     for (size_t i = 0; i < ds.size(); ++i) {
         setColor(MAU_DO); cout << "| "; resetColor(); cout << left << setw(3) << i + 1;
         
         if (ds[i] == nullptr) {
-            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(11) << "NULL";
-            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19) << "Khong ton tai";
+            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(13) << "NULL";
+            setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19 + tinhByteThua("Không tồn tại")) << "Không tồn tại";
             setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(10) << "";
             setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(14) << "";
             setColor(MAU_DO); cout << "|\n";
             continue;
         }
 
-        string loaiVK = "Khong Ro";
-        if (dynamic_cast<const Kiem*>(ds[i])) loaiVK = "Kiem";
-        else if (dynamic_cast<const Sung*>(ds[i])) loaiVK = "Sung";
-        else if (dynamic_cast<const PhepThuat*>(ds[i])) loaiVK = "Phep Thuat";
+        string loaiVK = "Không Rõ";
+        if (dynamic_cast<const Kiem*>(ds[i])) loaiVK = "Kiếm";
+        else if (dynamic_cast<const Sung*>(ds[i])) loaiVK = "Súng";
+        else if (dynamic_cast<const PhepThuat*>(ds[i])) loaiVK = "Phép Thuật";
 
-        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(11) << loaiVK;
-        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19) << ds[i]->getTenVuKhi();
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(13 + tinhByteThua(loaiVK)) << loaiVK;
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19 + tinhByteThua(ds[i]->getTenVuKhi())) << ds[i]->getTenVuKhi();
         setColor(MAU_DO); cout << "| "; resetColor(); cout << fixed << setprecision(2) << setw(10) << ds[i]->getSatThuongCoBan();
         setColor(MAU_DO); cout << "| "; resetColor(); cout << fixed << setprecision(2) << setw(14) << ds[i]->getTocDoRaDon();
         setColor(MAU_DO); cout << "|\n";
     }
-    cout << "+====+============+====================+===========+===============+\n";
+    cout << "+====+==============+====================+===========+===============+\n";
     resetColor();
 }
 
+/**
+ * @brief Hiển thị danh sách vũ khí và cho phép người dùng xem chi tiết từng vũ khí.
+ */
 void XemChiTietVuKhi(const vector<VuKhi*>& ds) {
     if (ds.empty()) {
-        InCanhBao("Danh sach vu khi dang rong.");
+        InCanhBao("Danh sách vũ khí đang trống.");
         return;
     }
 
@@ -496,7 +528,7 @@ void XemChiTietVuKhi(const vector<VuKhi*>& ds) {
     int chon = -1;
     while (true) {
         setColor(MAU_VANG);
-        cout << "\nNhap STT vu khi de xem chi tiet (0 de quay lai): ";
+        cout << "\nNhập STT vũ khí để xem chi tiết (0 để quay lại): ";
         resetColor();
         cin >> chon;
         
@@ -508,11 +540,11 @@ void XemChiTietVuKhi(const vector<VuKhi*>& ds) {
         if (chon > 0 && chon <= static_cast<int>(ds.size())) {
             cout << "\n";
             if (ds[chon - 1] == nullptr) {
-                InLoi("Vu khi khong ton tai.");
+                InLoi("Vũ khí không tồn tại.");
                 continue;
             }
             setColor(MAU_VANG);
-            cout << " >> [Chi tiet Vu khi " << chon << "] <<\n";
+            cout << " >> [Chi tiết Vũ khí " << chon << "] <<\n";
             resetColor();
             if (const Kiem* k = dynamic_cast<const Kiem*>(ds[chon - 1])) {
                 cout << *k << '\n';
@@ -521,8 +553,13 @@ void XemChiTietVuKhi(const vector<VuKhi*>& ds) {
             } else if (const PhepThuat* p = dynamic_cast<const PhepThuat*>(ds[chon - 1])) {
                 cout << *p << '\n';
             }
+            setColor(MAU_CYAN);
+            cout << "\n  Nhấn Enter để tiếp tục...";
+            resetColor();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get();
         } else {
-            InLoi("STT khong hop le.");
+            InLoi("STT không hợp lệ.");
         }
     }
 }
@@ -534,14 +571,14 @@ VuKhi* TaoVuKhiTheoLuaChon() {
     int chon;
 
     setColor(MAU_XANH_DUONG);
-    cout << "Chon loai vu khi:\n";
-    cout << "1. Kiem\n";
-    cout << "2. Sung\n";
-    cout << "3. PhepThuat\n";
+    cout << "Chọn loại vũ khí:\n";
+    cout << "1. Kiếm\n";
+    cout << "2. Súng\n";
+    cout << "3. Phép Thuật\n";
     resetColor();
 
     setColor(MAU_VANG);
-    cout << "Nhap lua chon: ";
+    cout << "Nhập lựa chọn: ";
     resetColor();
     cin >> chon;
 
@@ -567,7 +604,7 @@ VuKhi* TaoVuKhiTheoLuaChon() {
             break;
         }
         default:
-            InLoi("Lua chon khong hop le. Khong tao vu khi.");
+            InLoi("Lựa chọn không hợp lệ. Không tạo vũ khí.");
             break;
     }
 
@@ -579,16 +616,16 @@ VuKhi* TaoVuKhiTheoLuaChon() {
  * @return Con trỏ vũ khí vừa được thêm vào kho.
  */
 VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
-    TieuDe("THEM VU KHI", MAU_VANG);
+    TieuDe("THÊM VŨ KHÍ", MAU_VANG);
     VuKhi* vk = TaoVuKhiTheoLuaChon();
 
     if (vk == nullptr) {
-        InLoi("Them vu khi that bai.");
+        InLoi("Thêm vũ khí thất bại.");
         return nullptr;
     }
 
     ds.push_back(vk);
-    InThongBao("Da them vu khi thanh cong.");
+    InThongBao("Đã thêm vũ khí thành công.");
     return vk; 
 }
 
@@ -604,8 +641,8 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
     string duongDanFile, thuocTinhVuKhi;
     cin.ignore();
     cin.clear();
-    cout << "Format: LOAI|tenVuKhi|satThuongCoBan|tocDoRaDon|thuocTinhRieng1|thuocTinhRieng2\n"; ;
-    cout << "Nhap duong dan file txt: " ;
+    cout << "Format: LOAI|tenVuKhi|satThuongCoBan|tocDoRaDon|thuocTinhRieng1|thuocTinhRieng2\n";
+    cout << "Nhập đường dẫn file txt: ";
     getline(cin, duongDanFile);
 
     ifstream inp (duongDanFile);
@@ -643,7 +680,7 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
                     soLuongDanToiDa = stoi(soLuongDanToiDaSTR);
                     tocDoThayBang   = stof(tocDoThayBangSTR);
 
-                    // soLuongDanTrongOng tu dong = soLuongDanToiDa (bang day khi tao)
+                    // soLuongDanTrongOng tự động = soLuongDanToiDa (băng đầy khi tạo)
                     Sung* vk = new Sung(soLuongDanToiDa, tocDoThayBang, tenVuKhi, satThuongCoBan, tocDoRaDon);
                     ds.push_back(vk);
                 }
@@ -660,21 +697,21 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
                     ds.push_back(moi);
                 }
                 else {
-                    InLoi("Loai vu khi khong hop le: " + loaiVuKhi);
+                    InLoi("Loại vũ khí không hợp lệ: " + loaiVuKhi);
                     continue;
                 }
-                InThongBao("Da them vu khi thanh cong.");
+                InThongBao("Đã thêm vũ khí thành công.");
             }
             catch (...) {
-                InLoi("Khong the nhap vu khi nay.");
+                InLoi("Không thể nhập vũ khí này.");
                 continue;
             }
         }
-        InThongBao("Hoan tat them vu khi tu file.");
+        InThongBao("Hoàn tất thêm vũ khí từ file.");
     }
     else {
         cout << duongDanFile << endl;
-        InLoi("Duong dan khong ton tai.");
+        InLoi("Đường dẫn không tồn tại.");
     }
 } 
 
@@ -709,7 +746,7 @@ VuKhi* SaoChepVuKhi(const VuKhi* src) {
  */
 VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
     if (ds.empty()) {
-        InCanhBao("Danh sach vu khi rong.");
+        InCanhBao("Danh sách vũ khí trống.");
         return nullptr;
     }
 
@@ -717,18 +754,18 @@ VuKhi* ChonVuKhiTuDanhSach(vector<VuKhi*>& ds) {
 
     int idx;
     setColor(MAU_VANG);
-    cout << "Chon vu khi cho nhan vat (1-" << ds.size() << "): ";
+    cout << "Chọn vũ khí cho nhân vật (1-" << ds.size() << "): ";
     resetColor();
     cin >> idx;
 
     if (!cin || idx < 1 || idx > static_cast<int>(ds.size())) {
         XoaBoDemNhap();
-        InLoi("Chi so vu khi khong hop le.");
+        InLoi("Chỉ số vũ khí không hợp lệ.");
         return nullptr;
     }
 
     if (ds[idx - 1] == nullptr) {
-        InLoi("Vu khi khong ton tai.");
+        InLoi("Vũ khí không tồn tại.");
         return nullptr;
     }
 
@@ -815,11 +852,11 @@ public:
     string ten;
     float mau;
     int nangLuong;
-    cout << "Nhap ten nhan vat: ";
+    cout << "Nhập tên nhân vật: ";
     getline(in >> ws, ten);
-    cout << "Nhap mau: ";
+    cout << "Nhập máu (HP): ";
     in >> mau;
-    cout << "Nhap nang luong: ";
+    cout << "Nhập năng lượng (Mana): ";
     in >> nangLuong;
 
     nv.setTenNhanVat(ten);
@@ -831,23 +868,25 @@ public:
     
     friend ostream& operator<<(ostream& out, NhanVat nv) {
         setColor(MAU_XANH_LA); out << "+=========================================+\n| ";
-        resetColor(); out << left << setw(18) << "Ten nhan vat:" << setw(20) << nv.tenNhanVat;
+        resetColor(); out << left << setw(22 + tinhByteThua("Tên nhân vật:")) << "Tên nhân vật:" << setw(16 + tinhByteThua(nv.tenNhanVat)) << nv.tenNhanVat;
         setColor(MAU_XANH_LA); out << "|\n| ";
-        resetColor(); out << setw(18) << "Mau:" << fixed << setprecision(2) << setw(20) << nv.mau;
+        resetColor(); out << setw(22 + tinhByteThua("Máu (HP):")) << "Máu (HP):" << fixed << setprecision(2) << setw(16) << nv.mau;
         setColor(MAU_XANH_LA); out << "|\n| ";
-        resetColor(); out << setw(18) << "Nang luong:" << setw(20) << nv.nangLuong;
+        resetColor(); out << setw(22 + tinhByteThua("Năng lượng (Mana):")) << "Năng lượng (Mana):" << setw(16) << nv.nangLuong;
         setColor(MAU_XANH_LA); out << "|\n| ";
-        resetColor(); out << setw(18) << "Trang thai:" << setw(20) << ((nv.mau > 0) ? "Con song" : "Da bi ha guc");
+        
+        string trangThai = (nv.mau > 0) ? "Còn sống" : "Đã bị hạ gục";
+        resetColor(); out << setw(22 + tinhByteThua("Trạng thái:")) << "Trạng thái:" << setw(16 + tinhByteThua(trangThai)) << trangThai;
         setColor(MAU_XANH_LA); out << "|\n| ";
-        resetColor(); out << setw(18) << "Vu khi:";
+        resetColor(); out << setw(22 + tinhByteThua("Vũ khí trang bị:")) << "Vũ khí trang bị:";
         
         if (nv.vk == nullptr) {
-            out << setw(20) << "Khong co";
+            out << setw(16 + tinhByteThua("Không có")) << "Không có";
             setColor(MAU_XANH_LA); out << "|\n+=========================================+\n";
             resetColor();
             return out;
         } else {
-            out << setw(20) << "";
+            out << setw(16) << "";
             setColor(MAU_XANH_LA); out << "|\n";
             resetColor();
         }
@@ -889,19 +928,19 @@ public:
      */
     void TanCongMucTieu(NhanVat& b, int t) {
         if (vk == nullptr) {
-            InLoi("  [!] " + tenNhanVat + " chua co vu khi de tan cong.");
+            InLoi("  [!] " + tenNhanVat + " chưa có vũ khí để tấn công.");
             return;
         }
         if (mau <= 0) {
-            InLoi("  [!] " + tenNhanVat + " da bi ha guc nen khong the tan cong.");
+            InLoi("  [!] " + tenNhanVat + " đã bị hạ gục nên không thể tấn công.");
             return;
         }
         if (b.mau <= 0) {
-            InLoi("  [!] " + b.tenNhanVat + " da bi ha guc.");
+            InLoi("  [!] " + b.tenNhanVat + " đã bị hạ gục.");
             return;
         }
         if (t <= 0) {
-            InLoi("  [!] Thoi gian tan cong phai > 0.");
+            InLoi("  [!] Thời gian tấn công phải > 0.");
             return;
         }
         
@@ -930,11 +969,11 @@ public:
         setColor(MAU_XANH_DUONG);
         cout << tenNhanVat;
         setColor(MAU_TRANG_SANG);
-        cout << " gay ra ";
+        cout << " gây ra ";
         setColor(MAU_DO);
         cout << fixed << setprecision(2) << satThuong;
         setColor(MAU_TRANG_SANG);
-        cout << " sat thuong len ";
+        cout << " sát thương lên ";
         setColor(MAU_XANH_DUONG);
         cout << b.tenNhanVat << "!\n\n";
         resetColor();
@@ -947,45 +986,47 @@ void LamMoiManHinh() {
     system("cls");
 }
 
+/// @brief Hiển thị danh sách nhân vật dưới dạng bảng tóm tắt.
 void HienThiDanhSach(const vector<NhanVat>& ds) {
     if (ds.empty()) {
         InCanhBao("Danh sach nhan vat dang rong.");
         return;
     }
 
-    TieuDe("DANH SACH NHAN VAT", MAU_XANH_LA);
+    TieuDe("DANH SÁCH NHÂN VẬT", MAU_XANH_LA);
 
     setColor(MAU_DO);
     cout << "+====+====================+========+========+====================+\n";
     cout << "|"; resetColor(); cout << left << setw(4) << "STT";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20) << " Ten Nhan Vat";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(8) << " Mau";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(8) << " N.Luong";
-    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20) << " Vu Khi (Ten)";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20 + tinhByteThua(" Tên Nhân Vật")) << " Tên Nhân Vật";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(8 + tinhByteThua(" Máu")) << " Máu";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(8 + tinhByteThua(" N.Lượng")) << " N.Lượng";
+    setColor(MAU_DO); cout << "|"; resetColor(); cout << setw(20 + tinhByteThua(" Vũ Khí (Tên)")) << " Vũ Khí (Tên)";
     setColor(MAU_DO); cout << "|\n";
     cout << "+====+====================+========+========+====================+\n";
     
     for (size_t i = 0; i < ds.size(); ++i) {
         setColor(MAU_DO); cout << "| "; resetColor(); cout << left << setw(3) << i + 1;
-        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19) << ds[i].getTenNhanVat();
+        setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(19 + tinhByteThua(ds[i].getTenNhanVat())) << ds[i].getTenNhanVat();
         setColor(MAU_DO); cout << "| "; resetColor(); cout << fixed << setprecision(2) << setw(7) << ds[i].getMau();
         setColor(MAU_DO); cout << "| "; resetColor(); cout << setw(7) << ds[i].getNangLuong();
         setColor(MAU_DO); cout << "| "; resetColor(); 
         
-        string tenVK = "Khong co";
+        string tenVK = "Không có";
         if (ds[i].getVuKhi() != nullptr) {
             tenVK = ds[i].getVuKhi()->getTenVuKhi();
         }
-        cout << setw(19) << tenVK;
+        cout << setw(19 + tinhByteThua(tenVK)) << tenVK;
         setColor(MAU_DO); cout << "|\n";
     }
     cout << "+====+====================+========+========+====================+\n";
     resetColor();
 }
 
+/// @brief Hiển thị danh sách và cho phép người dùng xem chi tiết từng nhân vật.
 void XemChiTietNhanVat(const vector<NhanVat>& ds) {
     if (ds.empty()) {
-        InCanhBao("Danh sach nhan vat dang rong.");
+        InCanhBao("Danh sách nhân vật đang trống.");
         return;
     }
 
@@ -994,7 +1035,7 @@ void XemChiTietNhanVat(const vector<NhanVat>& ds) {
     int chon = -1;
     while (true) {
         setColor(MAU_VANG);
-        cout << "\nNhap STT nhan vat de xem chi tiet (0 de quay lai): ";
+        cout << "\nNhập STT nhân vật để xem chi tiết (0 để quay lại): ";
         resetColor();
         cin >> chon;
         
@@ -1006,33 +1047,91 @@ void XemChiTietNhanVat(const vector<NhanVat>& ds) {
         if (chon > 0 && chon <= static_cast<int>(ds.size())) {
             cout << "\n";
             setColor(MAU_VANG);
-            cout << " >> [Chi tiet Nhan vat " << chon << "] <<\n";
+            cout << " >> [Chi tiết Nhân vật " << chon << "] <<\n";
             resetColor();
             cout << ds[chon - 1] << "\n";
+            setColor(MAU_CYAN);
+            cout << "\n  Nhấn Enter để tiếp tục...";
+            resetColor();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get();
         } else {
-            InLoi("STT khong hop le.");
+            InLoi("STT không hợp lệ.");
         }
     }
 }
 
+/**
+ * @brief Khởi tạo dữ liệu mẫu gồm 3 nhân vật và 3 vũ khí đại diện 3 loại.
+ *
+ * Xóa toàn bộ dữ liệu cũ (giải phóng bộ nhớ) trước khi tạo mới.
+ * @param ds Danh sách nhân vật.
+ * @param dsVK Kho vũ khí.
+ */
 void TaoDuLieuMau(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
-    dsVK.push_back(new Kiem(12, "Excalibur", 18.5f, 1.0f));
-    dsVK.push_back(new Sung(30, 2.5f, "M4A1", 7.5f, 0.2f));
-    dsVK.push_back(new PhepThuat("Hoa cau", 15, "Truong lua", 25.0f, 1.5f));
+    // Xóa dữ liệu cũ nếu có
+    for (VuKhi* vk : dsVK) {
+        delete vk;
+    }
+    dsVK.clear();
+    ds.clear();
 
-    ds.push_back(NhanVat("Arthur", 250.0f, 80, SaoChepVuKhi(dsVK[0])));
-    ds.push_back(NhanVat("Rambo", 220.0f, 60, SaoChepVuKhi(dsVK[1])));
-    ds.push_back(NhanVat("Merlin", 180.0f, 120, SaoChepVuKhi(dsVK[2])));
+    // Tạo danh sách vũ khí mẫu
+    dsVK.push_back(new Kiem(
+        25,             // Độ bền
+        "Excalibur",    // Tên vũ khí
+        22.0f,          // Sát thương cơ bản
+        1.2f            // Tốc độ ra đòn
+    ));
 
-    InThongBao("Da tao 3 nhan vat mau va 3 vu khi mau trong kho.");
+    dsVK.push_back(new Sung(
+        30,             // Số đạn trong băng
+        2.5f,           // Thời gian thay băng
+        "M4A1",         // Tên vũ khí
+        12.0f,          // Sát thương cơ bản
+        3.0f            // Tốc độ bắn
+    ));
+
+    dsVK.push_back(new PhepThuat(
+        "Hoa cau",      // Loại phép
+        12,             // Mana tiêu thụ mỗi giây
+        "Truong lua",   // Tên phép
+        28.0f,          // Sát thương cơ bản
+        1.0f            // Tốc độ ra phép
+    ));
+
+    // Tạo danh sách nhân vật mẫu
+    ds.push_back(NhanVat(
+        "Arthur",
+        500.0f,                 // Máu cao vì là đấu sĩ cận chiến
+        150,                    // Năng lượng vừa phải
+        SaoChepVuKhi(dsVK[0])
+    ));
+
+    ds.push_back(NhanVat(
+        "Rambo",
+        420.0f,                 // Máu trung bình khá
+        180,                    // Năng lượng khá
+        SaoChepVuKhi(dsVK[1])
+    ));
+
+    ds.push_back(NhanVat(
+        "Merlin",
+        350.0f,                 // Máu thấp hơn vì là pháp sư
+        300,                    // Mana cao để dùng phép
+        SaoChepVuKhi(dsVK[2])
+    ));
+    
+    InThongBao("Đã tạo 3 nhân vật mẫu và 3 vũ khí mẫu trong kho.");
 }
 
+/// @brief Thêm một nhân vật mới vào danh sách bằng cách nhập từ bàn phím.
 void ThemNhanVat(vector<NhanVat>& ds) {
-    TieuDe("THEM NHAN VAT", MAU_VANG);
+    TieuDe("THÊM NHÂN VẬT", MAU_VANG);
     NhanVat nv;
     cin >> nv;
     ds.push_back(nv);
-    InThongBao("Da them nhan vat thanh cong.");
+    InThongBao("Đã thêm nhân vật thành công.");
 }
 
 /**
@@ -1045,7 +1144,7 @@ void ThemNhanVat(vector<NhanVat>& ds) {
  */
 void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
     if (ds.empty()) {
-        InCanhBao("Chua co nhan vat nao.");
+        InCanhBao("Chưa có nhân vật nào.");
         return;
     }
 
@@ -1054,19 +1153,19 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
     int idx, opt;
     VuKhi* moi;
     setColor(MAU_VANG);
-    cout << "Chon chi so nhan vat can trang bi (1-" << ds.size() << "): ";
+    cout << "Chọn chỉ số nhân vật cần trang bị (1-" << ds.size() << "): ";
     resetColor();
     cin >> idx;
 
     if (idx < 1 || idx > static_cast<int>(ds.size())) {
-        InLoi("Chi so khong hop le.");
+        InLoi("Chỉ số không hợp lệ.");
         return;
     }
 
-    cout << "1. Trang bi vu khi co san\n"
-         << "2. Trang bi vu khi moi\n";
+    cout << "1. Trang bị vũ khí có sẵn\n"
+         << "2. Trang bị vũ khí mới\n";
     
-    cout << "Nhap lua chon: ";
+    cout << "Nhập lựa chọn: ";
     cin >> opt;
     switch (opt) {
         case 1:
@@ -1080,18 +1179,21 @@ void TrangBiChoNhanVat(vector<NhanVat>& ds, vector<VuKhi*>& dsVK) {
             break;
         }
         default:
-            InLoi("Chi so khong hop le.");
+        InLoi("Chỉ số không hợp lệ.");
             return;
     }
 
     if (moi == nullptr) {
-        InLoi("Khong the trang bi vu khi.");
+        InLoi("Không thể trang bị vũ khí.");
         return;
     }
 
     ds[idx - 1].TrangBi(moi);
 }
 
+/**
+ * @brief Tách một chuỗi nhiều dòng thành vector các chuỗi dòng đơn.
+ */
 vector<string> splitLines(const string& s) {
     vector<string> lines;
     stringstream ss(s);
@@ -1103,6 +1205,11 @@ vector<string> splitLines(const string& s) {
     return lines;
 }
 
+/**
+ * @brief In một dòng văn bản dài 43 ký tự, áp dụng màu sắc phù hợp với loại dòng.
+ * @param line Nội dung dòng cần in.
+ * @param mauKhung Mã màu dùng cho viền ngoài.
+ */
 void InDongCoMau(string line, int mauKhung) {
     if (line.empty()) {
         cout << string(43, ' ');
@@ -1133,6 +1240,9 @@ void InDongCoMau(string line, int mauKhung) {
     }
 }
 
+/**
+ * @brief Hiển thị thông tin 2 nhân vật song song cạnh nhau để dễ so sánh.
+ */
 void HienThiHaiNhanVatSongSong(const NhanVat& nv1, const NhanVat& nv2) {
     stringstream ss1, ss2;
     ss1 << nv1;
@@ -1144,7 +1254,7 @@ void HienThiHaiNhanVatSongSong(const NhanVat& nv1, const NhanVat& nv2) {
     size_t maxLines = max(lines1.size(), lines2.size());
     
     setColor(MAU_VANG);
-    cout << " >> [Nhan vat 1]" << string(31, ' ') << " >> [Nhan vat 2]\n";
+    cout << " >> [Nhân vật 1]" << string(31, ' ') << " >> [Nhân vật 2]\n";
     resetColor();
 
     for (size_t i = 0; i < maxLines; ++i) {
@@ -1159,9 +1269,15 @@ void HienThiHaiNhanVatSongSong(const NhanVat& nv1, const NhanVat& nv2) {
     cout << "\n";
 }
 
+/**
+ * @brief Mô phỏng trận chiến giữa 2 nhân vật, mỗi lượt nhập thời gian tấn công.
+ *
+ * Người dùng chọn 2 nhân vật, sau đó mỗi vòng nhập thời gian t(giây).
+ * Thứ tự tấn công được quyết định ngẫu nhiên mỗi lượt.
+ */
 void TanCong(vector<NhanVat>& ds) {
     if (ds.size() < 2) {
-        InCanhBao("Can it nhat 2 nhan vat de mo phong tan cong.");
+        InCanhBao("Cần ít nhất 2 nhân vật để mô phỏng tấn công.");
         return;
     }
 
@@ -1170,19 +1286,19 @@ void TanCong(vector<NhanVat>& ds) {
     int a, b;
 
     setColor(MAU_VANG);
-    cout << "Chon nhan vat thu nhat (1-" << ds.size() << "): ";
+    cout << "Chọn nhân vật thứ nhất (1-" << ds.size() << "): ";
     resetColor();
     cin >> a;
 
     setColor(MAU_VANG);
-    cout << "Chon nhan vat thu hai (1-" << ds.size() << "): ";
+    cout << "Chọn nhân vật thứ hai (1-" << ds.size() << "): ";
     resetColor();
     cin >> b;
 
     if (!cin || a < 1 || a > static_cast<int>(ds.size()) ||
         b < 1 || b > static_cast<int>(ds.size()) || a == b) {
         XoaBoDemNhap();
-        InLoi("Lua chon khong hop le.");
+        InLoi("Lựa chọn không hợp lệ.");
         return;
     }
 
@@ -1192,52 +1308,64 @@ void TanCong(vector<NhanVat>& ds) {
         int t;
 
         setColor(MAU_VANG);
-        cout << "Nhap thoi gian tan cong t: ";
+        cout << "Nhập thời gian tấn công t (giây): ";
         resetColor();
         cin >> t;
 
         if (!cin || t <= 0) {
             XoaBoDemNhap();
-            InLoi("Thoi gian tan cong phai la so nguyen > 0.");
+            InLoi("Thời gian tấn công phải là số nguyên > 0.");
             continue;
         }
 
-        TieuDe("KET QUA TAN CONG", MAU_DO);
+        TieuDe("KẾT QUẢ TẤN CÔNG", MAU_DO);
         
         int turn = rand() % 2;
         if (turn == 0) {
-            InThongBao(" -> " + ds[a - 1].getTenNhanVat() + " gianh duoc quyen tan cong truoc!");
+            InThongBao(" -> " + ds[a - 1].getTenNhanVat() + " giành được quyền tấn công trước!");
             ds[a - 1].TanCongMucTieu(ds[b - 1], t);
             if (ds[b - 1].getMau() > 0) {
                 ds[b - 1].TanCongMucTieu(ds[a - 1], t);
             }
         } else {
-            InThongBao(" -> " + ds[b - 1].getTenNhanVat() + " gianh duoc quyen tan cong truoc!");
+            InThongBao(" -> " + ds[b - 1].getTenNhanVat() + " giành được quyền tấn công trước!");
             ds[b - 1].TanCongMucTieu(ds[a - 1], t);
             if (ds[a - 1].getMau() > 0) {
                 ds[a - 1].TanCongMucTieu(ds[b - 1], t);
             }
         }
 
-        TieuDe("TRANG THAI SAU LUOT TAN CONG", MAU_XANH_LA);
+        TieuDe("TRẠNG THÁI SAU LƯỢT TẤN CÔNG", MAU_XANH_LA);
 
         HienThiHaiNhanVatSongSong(ds[a - 1], ds[b - 1]);
 
         if (ds[a - 1].getMau() <= 0 && ds[b - 1].getMau() <= 0) {
-            InThongBao("Ca hai nhan vat da bi ha guc. Ket thuc tran dau.");
+            InThongBao("Cả hai nhân vật đã bị hạ gục. Kết thúc trận đấu.");
+            setColor(MAU_CYAN);
+            resetColor();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get();
             break;
         }
         if (ds[a - 1].getMau() <= 0) {
-            InThongBao(ds[a - 1].getTenNhanVat() + " da bi ha guc. Ket thuc tran dau.");
+            InThongBao(ds[a - 1].getTenNhanVat() + " đã bị hạ gục. Kết thúc trận đấu.");
+            setColor(MAU_CYAN);
+            resetColor();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get();
             break;
         }
         if (ds[b - 1].getMau() <= 0) {
-            InThongBao(ds[b - 1].getTenNhanVat() + " da bi ha guc. Ket thuc tran dau.");
+            InThongBao(ds[b - 1].getTenNhanVat() + " đã bị hạ gục. Kết thúc trận đấu.");
+            setColor(MAU_CYAN);
+            resetColor();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get();
             break;
         }
 
         setColor(MAU_VANG);
-        cout << "1. Tan cong tiep\n0. Ket thuc tan cong\nLua chon: ";
+        cout << "1. Tấn công tiếp\n0. Kết thúc tấn công\nLựa chọn: ";
         resetColor();
         cin >> luaChonTiepTuc;
 
@@ -1249,7 +1377,7 @@ void TanCong(vector<NhanVat>& ds) {
 }
 
 void InMenu() {
-    TieuDe("CHUONG TRINH QUAN LY NHAN VAT - VU KHI", MAU_TIM);
+    TieuDe("CHƯƠNG TRÌNH QUẢN LÝ NHÂN VẬT - VŨ KHÍ", MAU_TIM);
 
     setColor(MAU_XANH_DUONG);
     cout << left
@@ -1261,7 +1389,7 @@ void InMenu() {
          << setw(6) << "6." << "Hiển thị danh sách các loại vũ khí trong kho\n"
          << setw(6) << "7." << "Trang bị / thay vũ khí cho nhân vật\n"
          << setw(6) << "8." << "Nhân vật tấn công mục tiêu\n"
-         << setw(6) << "0." << "Thoat\n";
+         << setw(6) << "0." << "Thoát\n";
     resetColor();
 
     setColor(MAU_VANG);
@@ -1285,7 +1413,7 @@ int main() {
         cin >> luaChon;
         if (!cin) {
             XoaBoDemNhap();
-            InLoi("Vui long nhap so hop le.");
+            InLoi("Vui lòng nhập số hợp lệ.");
             continue;
         }
 
@@ -1315,14 +1443,18 @@ int main() {
                 TanCong(danhSach);
                 break;
             case 0:
-                InThongBao("Tam biet!");
+                InThongBao("Tạm biệt!");
                 break;
             default:
-                InLoi("Lua chon khong hop le.");
+                InLoi("Lựa chọn không hợp lệ.");
         }
 
         if (luaChon != 0) {
-            system("pause > nul");
+            setColor(MAU_CYAN);
+            cout << "\nNh\u1ea5n Enter \u0111\u1ec3 ti\u1ebfp t\u1ee5c...";
+            resetColor();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get();
             LamMoiManHinh();
         }
 
