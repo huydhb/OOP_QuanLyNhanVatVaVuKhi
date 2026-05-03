@@ -132,7 +132,7 @@ public:
     Kiem(const Kiem &k) : VuKhi(k) {
         doBen = k.doBen;
     }
-    ~Kiem() {};
+    virtual ~Kiem() {};
     
     // 3. in - out
     friend istream& operator>>(istream& in, Kiem& k) {
@@ -156,7 +156,7 @@ public:
         return in;
     }
 
-    friend ostream& operator<<(ostream& out, const Kiem& k) {
+    friend ostream& operator<<(ostream& out, Kiem k) {
         setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
         resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Kiem";
         setColor(MAU_CYAN); out << "|\n  | ";
@@ -197,60 +197,72 @@ public:
 /**
  * @class Sung
  * @brief Lớp đại diện cho vũ khí tầm xa (Súng).
- * 
- * Kế thừa từ VuKhi, mô phỏng cơ chế xả đạn thực tế bao gồm 
- * sức chứa hộp đạn (soLuongDanTrongOng) và thời gian nạp đạn (tocDoThayBang).
+ *
+ * Kế thừa từ VuKhi. Mô phỏng cơ chế xả đạn thực tế:
+ *   - soLuongDanToiDa    : dung tích băng (cố định, VD AK47=30, AWM=5).
+ *   - soLuongDanTrongOng : đạn HIỆN TẠI trong băng (trạng thái thay đổi).
+ *   - tocDoThayBang      : giây để nạp 1 băng đầy.
+ * Logic SatThuong(t): bắn từng viên, hết băng (X/Max → 0/Max) thì
+ * dừng tocDoThayBang giây nạp lại, rồi tiếp tục cho đến hết t.
  */
 class Sung : public VuKhi {
 private:
-    int soLuongDanTrongOng;
-    float tocDoThayBang;
+    int soLuongDanToiDa;    // Dung tich bang (khong doi)
+    int soLuongDanTrongOng; // Dan hien tai trong bang (trang thai)
+    float tocDoThayBang;    // Giay de nap 1 bang day
 
 public:
     // 1. get - set
+    int getSoLuongDanToiDa() const { return soLuongDanToiDa; }
+    void setSoLuongDanToiDa(int _v) { soLuongDanToiDa = (_v > 0) ? _v : 1; }
     int getSoLuongDanTrongOng() const { return soLuongDanTrongOng; }
-    void setSoLuongDanTrongOng(int _soLuongDanTrongOng) { soLuongDanTrongOng = _soLuongDanTrongOng; }
+    void setSoLuongDanTrongOng(int _v) { soLuongDanTrongOng = (_v >= 0) ? _v : 0; }
     float getTocDoThayBang() const { return tocDoThayBang; }
-    void setTocDoThayBang(float _tocDoThayBang) { tocDoThayBang = _tocDoThayBang; }
+    void setTocDoThayBang(float _v) { tocDoThayBang = _v; }
 
     // 2. constructor
-    Sung(int _soLuongDanTrongOng = 0, float _tocDoThayBang = 0, string _tenVuKhi = "", float _satThuongCoBan = 0, float _tocDoRaDon = 1) 
+    Sung(int _soLuongDanToiDa = 30, float _tocDoThayBang = 2.0f,
+         string _tenVuKhi = "", float _satThuongCoBan = 0, float _tocDoRaDon = 1)
         : VuKhi(_tenVuKhi, _satThuongCoBan, _tocDoRaDon) {
-        soLuongDanTrongOng = _soLuongDanTrongOng;
-        tocDoThayBang = _tocDoThayBang;
+        soLuongDanToiDa    = (_soLuongDanToiDa > 0) ? _soLuongDanToiDa : 1;
+        soLuongDanTrongOng = soLuongDanToiDa; // bat dau voi bang day
+        tocDoThayBang      = _tocDoThayBang;
     }
     Sung(const Sung &s) : VuKhi(s) {
+        soLuongDanToiDa    = s.soLuongDanToiDa;
         soLuongDanTrongOng = s.soLuongDanTrongOng;
-        tocDoThayBang = s.tocDoThayBang;
+        tocDoThayBang      = s.tocDoThayBang;
     }
-    ~Sung() {};
+    virtual ~Sung() {};
     
     //3. in - out
     friend istream& operator>>(istream& in, Sung& s) {
         string ten;
         float stcb, tdrd, tdthay;
-        int slDan;
+        int slToiDa;
 
         cout << "Nhap ten sung: ";
         getline(in >> ws, ten);
-        cout << "Nhap sat thuong co ban: ";
+        cout << "Nhap sat thuong co ban (1 vien): ";
         in >> stcb;
-        cout << "Nhap toc do ra don: ";
+        cout << "Nhap toc do ra don (giay/vien): ";
         in >> tdrd;
-        cout << "Nhap so luong dan trong ong: ";
-        in >> slDan;
-        cout << "Nhap toc do thay bang: ";
+        cout << "Nhap dung tich bang dan (so vien toi da): ";
+        in >> slToiDa;
+        cout << "Nhap toc do thay bang (giay): ";
         in >> tdthay;
 
         s.setTenVuKhi(ten);
         s.setSatThuongCoBan(stcb);
         s.setTocDoRaDon(tdrd);
-        s.setSoLuongDanTrongOng(slDan);
+        s.setSoLuongDanToiDa(slToiDa);
+        s.soLuongDanTrongOng = slToiDa; // nap day khi tao moi
         s.setTocDoThayBang(tdthay);
         return in;
     }
 
-    friend ostream& operator<<(ostream& out, const Sung& s) {
+    friend ostream& operator<<(ostream& out, Sung s) {
+        string danHienThi = to_string(s.soLuongDanTrongOng) + "/" + to_string(s.soLuongDanToiDa);
         setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
         resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Sung";
         setColor(MAU_CYAN); out << "|\n  | ";
@@ -260,7 +272,7 @@ public:
         setColor(MAU_CYAN); out << "|\n  | ";
         resetColor(); out << setw(18) << "Toc do ra don:" << fixed << setprecision(2) << setw(20) << s.getTocDoRaDon();
         setColor(MAU_CYAN); out << "|\n  | ";
-        resetColor(); out << setw(18) << "Dan trong ong:" << setw(20) << s.soLuongDanTrongOng;
+        resetColor(); out << setw(18) << "Dan trong bang:" << setw(20) << danHienThi;
         setColor(MAU_CYAN); out << "|\n  | ";
         resetColor(); out << setw(18) << "Toc do thay bang:" << fixed << setprecision(2) << setw(20) << s.tocDoThayBang;
         setColor(MAU_CYAN); out << "|\n  +---------------------------------------+";
@@ -275,19 +287,53 @@ public:
         resetColor();
     }
 
+/**
+     * @brief Tính sát thương gây ra trong khoảng thời gian t (giây).
+     *
+     * Mô phỏng logic bắn từng viên:
+     *   - Mỗi viên đạn mất [tocDoRaDon] giây để bắn ra.
+     *   - Khi [soLuongDanTrongOng] bằng 0 -> mất [tocDoThayBang] giây để nạp đầy lại.
+     *   - Quá trình lặp lại cho đến khi hết thời gian t.
+     * Lưu ý: Cập nhật số lượng đạn còn lại trong băng sau khi kết thúc t giây.
+     */
     float SatThuong(int t) override {
-        if (getTocDoRaDon() <= 0 || t <= 0 || soLuongDanTrongOng <= 0) return 0;
+        if (getTocDoRaDon() <= 0 || t <= 0) return 0;
 
-        float thoiGianBanHet1Bang = soLuongDanTrongOng * getTocDoRaDon();
-        float chuKy = thoiGianBanHet1Bang + tocDoThayBang;
-        if (chuKy <= 0) return 0;
+        float thoiGianConLai = static_cast<float>(t);
+        int tongDanBan = 0;
 
-        int soChuKy = static_cast<int>(floor(t / chuKy));
-        float thoiGianDu = t - soChuKy * chuKy;
-        int soVienBanThem = min(soLuongDanTrongOng,
-                                static_cast<int>(floor(thoiGianDu / getTocDoRaDon())));
-        int tongDan = soChuKy * soLuongDanTrongOng + soVienBanThem;
-        return tongDan * getSatThuongCoBan();
+        // Nếu băng đạn đang rỗng, phải nạp đạn trước khi bắt đầu bắn
+        if (soLuongDanTrongOng == 0) {
+            if (thoiGianConLai <= tocDoThayBang) return 0;
+            thoiGianConLai -= tocDoThayBang;
+            soLuongDanTrongOng = soLuongDanToiDa;
+        }
+
+        // Vòng lặp: Thực hiện mô phỏng bắn cho đến khi hết thời gian t
+        while (thoiGianConLai > 0) {
+            // Thời gian cần thiết để bắn hết số đạn hiện đang có trong băng
+            float thoiGianBanHetBang = soLuongDanTrongOng * getTocDoRaDon();
+
+            if (thoiGianConLai < thoiGianBanHetBang) {
+                // Không đủ thời gian để bắn hết cả băng -> tính số viên đạn bắn được trong phần thời gian còn lại
+                int vienBan = static_cast<int>(floor(thoiGianConLai / getTocDoRaDon()));
+                tongDanBan += vienBan;
+                soLuongDanTrongOng -= vienBan;
+                break;
+            }
+
+            // Bắn hết toàn bộ số đạn hiện có trong băng hiện tại
+            tongDanBan += soLuongDanTrongOng;
+            thoiGianConLai -= thoiGianBanHetBang;
+            soLuongDanTrongOng = 0;
+
+            // Thực hiện thay băng đạn: Nếu hết thời gian trong lúc đang thay đạn thì dừng
+            if (thoiGianConLai <= tocDoThayBang) break;
+            thoiGianConLai -= tocDoThayBang;
+            soLuongDanTrongOng = soLuongDanToiDa;
+        }
+
+        return tongDanBan * getSatThuongCoBan();
     }
 };
 
@@ -323,7 +369,7 @@ public:
         loaiPhep = p.loaiPhep;
         nangLuongTieuHao = p.nangLuongTieuHao;
     }
-    ~PhepThuat() {};
+    virtual ~PhepThuat() {};
 
     //3. in - out   
     friend istream& operator>>(istream& in, PhepThuat& p) {
@@ -350,7 +396,7 @@ public:
         return in;
     }
 
-    friend ostream& operator<<(ostream& out, const PhepThuat& p) {
+    friend ostream& operator<<(ostream& out, PhepThuat p) {
         setColor(MAU_CYAN); out << "  +---------------------------------------+\n  | ";
         resetColor(); out << left << setw(18) << "Loai vu khi:" << setw(20) << "Phep Thuat";
         setColor(MAU_CYAN); out << "|\n  | ";
@@ -551,7 +597,7 @@ VuKhi* ThemVuKhi(vector<VuKhi*>& ds) {
  *
  * Định dạng mỗi dòng:
  * KIEM|tenVuKhi|satThuongCoBan|tocDoRaDon|doBen
- * SUNG|tenVuKhi|satThuongCoBan|tocDoRaDon|soLuongDanTrongOng|tocDoThayBang
+ * SUNG|tenVuKhi|satThuongCoBan|tocDoRaDon|soLuongDanToiDa|tocDoThayBang
  * PHEPTHUAT|tenVuKhi|satThuongCoBan|tocDoRaDon|loaiPhep|nangLuongTieuHao
  */
 void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
@@ -589,17 +635,17 @@ void ThemVuKhiTuFile(vector<VuKhi*>& ds) {
                 }
 
                 else if (loaiVuKhi == "SUNG") {
-                    string soLuongDanTrongOngSTR, tocDoThayBangSTR;
-                    int soLuongDanTrongOng;
+                    string soLuongDanToiDaSTR, tocDoThayBangSTR;
+                    int soLuongDanToiDa;
                     float tocDoThayBang;
-                    getline(ss, soLuongDanTrongOngSTR, '|');
+                    getline(ss, soLuongDanToiDaSTR, '|');
                     getline(ss, tocDoThayBangSTR, '|');
-                    soLuongDanTrongOng = stoi(soLuongDanTrongOngSTR);
-                    tocDoThayBang = stof(tocDoThayBangSTR);
+                    soLuongDanToiDa = stoi(soLuongDanToiDaSTR);
+                    tocDoThayBang   = stof(tocDoThayBangSTR);
 
-                    Sung* vk = new Sung(soLuongDanTrongOng, tocDoThayBang, tenVuKhi, satThuongCoBan, tocDoRaDon);
-                    VuKhi* moi = vk;
-                    ds.push_back(moi);
+                    // soLuongDanTrongOng tu dong = soLuongDanToiDa (bang day khi tao)
+                    Sung* vk = new Sung(soLuongDanToiDa, tocDoThayBang, tenVuKhi, satThuongCoBan, tocDoRaDon);
+                    ds.push_back(vk);
                 }
                 else if (loaiVuKhi == "PHEPTHUAT") {
                     string loaiPhep, nangLuongTieuHaoSTR;
@@ -747,6 +793,17 @@ public:
 
     NhanVat(const NhanVat& other)
         : tenNhanVat(other.tenNhanVat), mau(other.mau), nangLuong(other.nangLuong), vk(SaoChepVuKhi(other.vk)) {}
+    
+    NhanVat& operator=(const NhanVat& other) {
+        if (this != &other) {
+            tenNhanVat = other.tenNhanVat;
+            mau = other.mau;
+            nangLuong = other.nangLuong;
+            delete vk;
+            vk = SaoChepVuKhi(other.vk);
+        }
+        return *this;
+    }
 
     ~NhanVat() {
         delete vk;
@@ -772,7 +829,7 @@ public:
     return in;
     }
     
-    friend ostream& operator<<(ostream& out, const NhanVat& nv) {
+    friend ostream& operator<<(ostream& out, NhanVat nv) {
         setColor(MAU_XANH_LA); out << "+=========================================+\n| ";
         resetColor(); out << left << setw(18) << "Ten nhan vat:" << setw(20) << nv.tenNhanVat;
         setColor(MAU_XANH_LA); out << "|\n| ";
@@ -1270,6 +1327,9 @@ int main() {
         }
 
     } while (luaChon != 0);
+
+    for (VuKhi* v : danhSachVK) delete v;
+    danhSachVK.clear();
 
     return 0;
 }
